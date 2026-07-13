@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>TripMate — Itinerary</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Outfit:wght@300;400;500;600&display=swap"
+        rel="stylesheet" />
+    <style>
+        /* ══════════════════════════════════════════
+   TRIPMATE — GENERAL Theme: Luminous Dusk · Glassmorphism
+══════════════════════════════════════════ */
+
+        :root {
+            --sky-top: #04091a;
+            --sky-mid: #0d1f4e;
+            --sky-lower: #1a4a8a;
+            --sky-dusk: #a04010;
+            --sky-amber: #f0a34a;
+            --sky-peach: #ffd090;
+            --gold: #f5a623;
+            --gold-light: #f5c96a;
+            --gold-dark: #b8621a;
+            --teal: #38c7b8;
+            --glass: rgba(255, 255, 255, 0.07);
+            --glass-border: rgba(255, 255, 255, 0.16);
+            --text-primary: rgba(255, 248, 235, 0.95);
+            --text-muted: rgba(220, 200, 165, 0.60);
+            --input-bg: rgba(255, 255, 255, 0.06);
+            --input-border: rgba(255, 255, 255, 0.14);
+            --input-focus: rgba(245, 166, 35, 0.45);
+            --ease: cubic-bezier(0.4, 0, 0.2, 1);
+            --ease-spring: cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        /* ── Reset ── */
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ══ SCENE ══ */
+        #scene {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(175deg,
+                    var(--sky-top) 0%,
+                    #0b1a44 28%,
+                    #153070 50%,
+                    var(--sky-dusk) 72%,
+                    var(--sky-amber) 85%,
+                    var(--sky-peach) 100%);
+            overflow: hidden;
+        }
+
+        /* ── Star Canvas ── */
+        #starCanvas {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+        }
+
+        /* ── Sun ── */
+        .sun {
+            position: absolute;
+            bottom: 28%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #ffe9a0 0%, #f5a623 42%, rgba(240, 120, 30, 0) 72%);
+            box-shadow: 0 0 70px 38px rgba(245, 166, 35, 0.26), 0 0 150px 75px rgba(240, 100, 10, 0.11);
+            animation: sun-pulse 8s ease-in-out infinite;
+            z-index: 1;
+        }
+
+        @keyframes sun-pulse {
+
+            0%,
+            100% {
+                transform: translateX(-50%) scale(1);
+                box-shadow: 0 0 70px 38px rgba(245, 166, 35, 0.26), 0 0 150px 75px rgba(240, 100, 10, 0.11);
+            }
+
+            50% {
+                transform: translateX(-50%) scale(1.1);
+                box-shadow: 0 0 100px 52px rgba(245, 166, 35, 0.36), 0 0 190px 95px rgba(240, 100, 10, 0.16);
+            }
+        }
+
+        /* ── Clouds ── */
+        .cloud-track {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 250%;
+            height: 100%;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .ct1 {
+            animation: drift 95s linear infinite;
+        }
+
+        .ct2 {
+            animation: drift 135s linear infinite;
+            animation-delay: -45s;
+        }
+
+        .ct3 {
+            animation: drift 75s linear infinite;
+            animation-delay: -18s;
+            opacity: .5;
+        }
+
+        @keyframes drift {
+            from {
+                transform: translateX(0);
+            }
+
+            to {
+                transform: translateX(-50%);
+            }
+        }
+
+        .cloud {
+            position: absolute;
+            border-radius: 60px;
+            background: rgba(255, 255, 255, 0.78);
+            filter: blur(3px);
+        }
+
+        .cloud::before,
+        .cloud::after {
+            content: '';
+            position: absolute;
+            background: inherit;
+            border-radius: 50%;
+        }
+
+        .cl-a {
+            width: 250px;
+            height: 60px;
+            top: 10%;
+            left: 5%
+        }
+
+        .cl-a::before {
+            width: 105px;
+            height: 105px;
+            top: -54px;
+            left: 38px
+        }
+
+        .cl-a::after {
+            width: 82px;
+            height: 82px;
+            top: -42px;
+            left: 108px
+        }
+
+        .cl-b {
+            width: 190px;
+            height: 48px;
+            top: 20%;
+            left: 47%;
+            opacity: .7
+        }
+
+        .cl-b::before {
+            width: 76px;
+            height: 76px;
+            top: -40px;
+            left: 26px
+        }
+
+        .cl-b::after {
+            width: 60px;
+            height: 60px;
+            top: -30px;
+            left: 76px
+        }
+
+        .cl-c {
+            width: 290px;
+            height: 68px;
+            top: 7%;
+            left: 74%;
+            opacity: .62
+        }
+
+        .cl-c::before {
+            width: 112px;
+            height: 112px;
+            top: -58px;
+            left: 48px
+        }
+
+        .cl-c::after {
+            width: 88px;
+            height: 88px;
+            top: -46px;
+            left: 128px
+        }
+
+        /* ── Mountains ── */
+        .mtns {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 50%;
+            z-index: 3;
+        }
+
+        .mtns svg {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        /* ── Trees ── */
+        .trees {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 20%;
+            z-index: 4;
+            pointer-events: none;
+        }
+
+        .trees svg {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        /* ── Ground ── */
+        .ground {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 8%;
+            background: linear-gradient(180deg, #0a1a0a 0%, #050d05 100%);
+            z-index: 5;
+        }
+
+        .ground::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 70%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(245, 166, 35, 0.32), transparent);
+        }
+
+        /* ── Airplane ── */
+        .plane-wrap {
+            position: absolute;
+            top: 14%;
+            left: -180px;
+            z-index: 6;
+            animation: fly 28s cubic-bezier(0.25, 0, 0.75, 1) infinite;
+        }
+
+        .plane-svg {
+            width: 150px;
+            height: auto;
+            filter: drop-shadow(0 6px 22px rgba(200, 230, 255, 0.45));
+            transform: rotate(-5deg);
+        }
+
+        @keyframes fly {
+            0% {
+                left: -180px;
+                top: 16%;
+                opacity: 0;
+            }
+
+            4% {
+                opacity: 1;
+            }
+
+            40% {
+                top: 12%;
+            }
+
+            65% {
+                top: 14%;
+            }
+
+            96% {
+                opacity: 1;
+            }
+
+            100% {
+                left: 110%;
+                top: 10%;
+                opacity: 0;
+            }
+        }
+
+        /* ── Overlay ── */
+        .overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 7;
+            background: linear-gradient(160deg,
+                    rgba(2, 7, 22, 0.55) 0%,
+                    rgba(10, 20, 55, 0.30) 50%,
+                    rgba(0, 0, 0, 0.58) 100%);
+            pointer-events: none;
+        }
+
+        /* ══ STAGE ══ */
+        .stage {
+            position: fixed;
+            inset: 0;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        /* ══ CARD ══ */
+        .card {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 50px 46px 42px;
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 30px;
+            backdrop-filter: blur(34px) saturate(1.8) brightness(1.06);
+            -webkit-backdrop-filter: blur(34px) saturate(1.8) brightness(1.06);
+            box-shadow:
+                0 14px 64px rgba(0, 0, 0, 0.52),
+                0 2px 0 rgba(255, 255, 255, 0.13) inset,
+                0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+            animation: card-rise 1s var(--ease-spring) both;
+        }
+
+        .card::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .card::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+        }
+
+        @keyframes card-rise {
+            from {
+                opacity: 0;
+                transform: translateY(44px) scale(0.96);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 18%;
+            right: 18%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(245, 166, 35, 0.78), transparent);
+            border-radius: 999px;
+        }
+
+        .card::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 28%;
+            right: 28%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(56, 199, 184, 0.42), transparent);
+        }
+
+        /* ── Back link ── */
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            font-weight: 400;
+            letter-spacing: .14em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            text-decoration: none;
+            margin-bottom: 28px;
+            transition: color .25s var(--ease), gap .25s var(--ease);
+            animation: fade-up .7s .1s both;
+        }
+
+        .back-link:hover {
+            color: rgba(245, 210, 130, 0.85);
+            gap: 8px;
+        }
+
+        .back-link svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        /* ── Header ── */
+        .card-header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 34px;
+            animation: fade-up .7s .15s both;
+        }
+
+        @keyframes fade-up {
+            from {
+                opacity: 0;
+                transform: translateY(14px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header-icon {
+            font-size: 48px;
+            line-height: 1;
+            margin-bottom: 12px;
+            filter: drop-shadow(0 5px 20px rgba(245, 166, 35, 0.52));
+        }
+
+        .card-title {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1.7rem, 5vw, 2.2rem);
+            font-weight: 900;
+            letter-spacing: .01em;
+            text-align: center;
+            line-height: 1.1;
+            background: linear-gradient(135deg, #fff 25%, #f5c96a 62%, #f5a623 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 6px;
+        }
+
+        .card-sub {
+            font-size: 11px;
+            font-weight: 300;
+            letter-spacing: .2em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+
+        /* ── Divider ── */
+        .div-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 28px;
+            animation: fade-up .7s .22s both;
+        }
+
+        .div-line {
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(245, 166, 35, 0.28), transparent);
+        }
+
+        .div-ico {
+            color: rgba(245, 166, 35, 0.45);
+            font-size: 9px;
+            letter-spacing: .1em;
+            white-space: nowrap;
+        }
+
+        /* ══ FORM ══ */
+        .form {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .date-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .field-label {
+            font-size: 10px;
+            font-weight: 500;
+            letter-spacing: .18em;
+            text-transform: uppercase;
+            color: rgba(220, 195, 145, 0.65);
+            padding-left: 4px;
+        }
+
+        .input-wrap {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input {
+            width: 100%;
+            padding: 15px 16px;
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
+            border-radius: 14px;
+            color: var(--text-primary);
+            font-family: 'Outfit', sans-serif;
+            font-size: 14px;
+            font-weight: 400;
+            outline: none;
+            transition: border-color .3s var(--ease), box-shadow .3s var(--ease), background .3s;
+        }
+
+        /* Fixing the default datepicker icon being unreadable */
+        ::-webkit-calendar-picker-indicator {
+            filter: invert(1);
+            opacity: 0.5;
+        }
+
+        .input::placeholder {
+            color: rgba(200, 180, 145, 0.38);
+            font-weight: 300;
+        }
+
+        .input:focus {
+            border-color: rgba(245, 166, 35, 0.55);
+            background: rgba(255, 255, 255, 0.09);
+            box-shadow: 0 0 0 3px rgba(245, 166, 35, 0.14);
+        }
+
+        textarea.input {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        /* ══ BUTTON ══ */
+        .btn-login {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            padding: 16px 24px;
+            border: none;
+            border-radius: 16px;
+            cursor: pointer;
+            background: linear-gradient(135deg, #b8621a 0%, #d98228 40%, #f5a623 78%, #f5c96a 100%);
+            color: #1a0900;
+            font-family: 'Outfit', sans-serif;
+            font-size: 15px;
+            font-weight: 600;
+            letter-spacing: .06em;
+            box-shadow: 0 6px 32px rgba(245, 166, 35, 0.42), 0 2px 10px rgba(0, 0, 0, 0.3);
+            transition: transform .3s var(--ease), box-shadow .3s var(--ease);
+            outline: none;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 48px rgba(245, 166, 35, 0.56), 0 4px 18px rgba(0, 0, 0, 0.35);
+        }
+
+        .btn-login:active {
+            transform: scale(0.97);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.13);
+            color: rgba(220, 205, 175, 0.85);
+            box-shadow: none;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.10);
+            border-color: rgba(255, 255, 255, 0.22);
+            color: rgba(245, 230, 200, 0.95);
+            box-shadow: none;
+        }
+
+        /* ══ DAY BOX ══ */
+        .day {
+            margin-top: 15px;
+            padding: 20px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.03);
+            animation: fade-up .5s ease-out both;
+        }
+
+        .day-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: rgba(245, 166, 35, 0.9);
+            margin-bottom: 12px;
+            letter-spacing: .05em;
+        }
+
+        .day .field {
+            margin-bottom: 10px;
+        }
+
+        /* ══ AI CHATBOX BUTTON ══ */
+        .ai-chat-btn {
+            position: fixed;
+            bottom: 28px;
+            right: 28px;
+            z-index: 90;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 24px;
+            background: linear-gradient(135deg, #b8621a 0%, #d98228 40%, #f5a623 78%, #f5c96a 100%);
+            color: #1a0900;
+            text-decoration: none;
+            border-radius: 50px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 15px;
+            font-weight: 700;
+            letter-spacing: .04em;
+            box-shadow: 0 6px 24px rgba(245, 166, 35, 0.42), 0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+            transition: transform .3s var(--ease), box-shadow .3s var(--ease);
+            animation: fade-up .7s 1s both;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .ai-chat-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 36px rgba(245, 166, 35, 0.56), 0 0 0 1px rgba(255, 255, 255, 0.3) inset;
+        }
+
+        .ai-chat-btn:active {
+            transform: scale(0.96);
+        }
+
+        .ai-chat-icon {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+            transition: transform .35s var(--ease);
+        }
+
+        .ai-chat-btn:hover .ai-chat-icon {
+            transform: rotate(-10deg) scale(1.1);
+        }
+
+        @media(max-width:768px) {
+            .ai-chat-btn {
+                bottom: 20px;
+                right: 20px;
+                padding: 12px 20px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ══ SCENE ══ -->
+    <div id="scene">
+        <canvas id="starCanvas"></canvas>
+        <div class="sun"></div>
+        <div class="cloud-track ct1">
+            <div class="cloud cl-a"></div>
+            <div class="cloud cl-b"></div>
+            <div class="cloud cl-c"></div>
+            <div class="cloud cl-f"></div>
+            <div class="cloud cl-a" style="left:52%"></div>
+            <div class="cloud cl-b" style="left:97%"></div>
+            <div class="cloud cl-c" style="left:124%"></div>
+        </div>
+        <div class="cloud-track ct2">
+            <div class="cloud cl-d"></div>
+            <div class="cloud cl-e"></div>
+            <div class="cloud cl-g"></div>
+            <div class="cloud cl-d" style="left:70%"></div>
+            <div class="cloud cl-e" style="left:106%"></div>
+        </div>
+
+        <!-- Mountains -->
+        <div class="mtns">
+            <svg viewBox="0 0 1440 380" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <linearGradient id="mFar" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#1c3066" stop-opacity=".72" />
+                        <stop offset="100%" stop-color="#080e22" stop-opacity="1" />
+                    </linearGradient>
+                    <linearGradient id="mMid" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#122050" stop-opacity=".88" />
+                        <stop offset="100%" stop-color="#060c18" stop-opacity="1" />
+                    </linearGradient>
+                    <linearGradient id="mNear" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#0c1830" stop-opacity="1" />
+                        <stop offset="100%" stop-color="#030810" stop-opacity="1" />
+                    </linearGradient>
+                    <linearGradient id="snow" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="rgba(255,255,255,0.52)" />
+                        <stop offset="100%" stop-color="rgba(255,255,255,0)" />
+                    </linearGradient>
+                </defs>
+                <polygon fill="url(#mFar)"
+                    points="0,240 80,138 165,192 268,98 375,162 485,78 604,157 724,63 844,147 965,73 1083,157 1204,83 1325,152 1440,98 1440,380 0,380" />
+                <polygon fill="url(#snow)" opacity=".68" points="268,98 248,130 288,130" />
+                <polygon fill="url(#snow)" opacity=".58" points="485,78 463,116 507,116" />
+                <polygon fill="url(#snow)" opacity=".68" points="724,63 702,98 746,98" />
+                <polygon fill="url(#snow)" opacity=".58" points="965,73 944,108 986,108" />
+                <polygon fill="url(#snow)" opacity=".52" points="1204,83 1183,118 1225,118" />
+                <polygon fill="url(#mMid)"
+                    points="0,278 72,208 152,248 243,183 342,228 452,163 572,223 682,153 803,218 922,158 1042,218 1163,163 1282,218 1382,178 1440,204 1440,380 0,380" />
+                <polygon fill="url(#mNear)"
+                    points="0,318 62,268 142,293 242,248 362,288 482,238 602,278 722,243 842,276 962,243 1082,278 1202,246 1332,273 1440,250 1440,380 0,380" />
+            </svg>
+        </div>
+
+        <!-- Trees -->
+        <div class="trees">
+            <svg viewBox="0 0 1440 160" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <linearGradient id="tG" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#0a1f0a" />
+                        <stop offset="100%" stop-color="#020602" />
+                    </linearGradient>
+                </defs>
+                <g fill="url(#tG)">
+                    <polygon points="8,160 23,93 38,160" />
+                    <polygon points="20,160 38,78 56,160" />
+                    <polygon points="36,160 53,88 70,160" />
+                    <polygon points="50,160 66,98 82,160" />
+                    <polygon points="63,160 78,83 93,160" />
+                    <polygon points="78,160 95,94 112,160" />
+                    <polygon points="93,160 110,86 127,160" />
+                    <polygon points="106,160 122,96 138,160" />
+                    <polygon points="152,160 169,82 186,160" />
+                    <polygon points="166,160 184,90 202,160" />
+                    <polygon points="182,160 198,84 214,160" />
+                    <polygon points="196,160 212,92 228,160" />
+                    <polygon points="213,160 230,86 247,160" />
+                    <polygon points="230,160 246,98 262,160" />
+                    <polygon points="1048,160 1065,86 1082,160" />
+                    <polygon points="1063,160 1081,78 1099,160" />
+                    <polygon points="1080,160 1096,88 1112,160" />
+                    <polygon points="1096,160 1112,83 1128,160" />
+                    <polygon points="1113,160 1130,90 1147,160" />
+                    <polygon points="1128,160 1146,82 1164,160" />
+                    <polygon points="1248,160 1265,88 1282,160" />
+                    <polygon points="1263,160 1281,78 1299,160" />
+                    <polygon points="1280,160 1296,86 1312,160" />
+                    <polygon points="1296,160 1313,90 1330,160" />
+                    <polygon points="1312,160 1330,80 1348,160" />
+                    <polygon points="1328,160 1346,88 1364,160" />
+                    <polygon points="1346,160 1363,82 1380,160" />
+                    <polygon points="1362,160 1379,91 1396,160" />
+                    <polygon points="1378,160 1396,78 1414,160" />
+                    <polygon points="1396,160 1413,86 1430,160" />
+                    <polygon points="1414,160 1430,90 1446,160" />
+                </g>
+            </svg>
+        </div>
+
+        <div class="ground"></div>
+
+        <!-- Airplane -->
+        <div class="plane-wrap">
+            <svg class="plane-svg" viewBox="0 0 130 42" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <ellipse cx="58" cy="21" rx="46" ry="9.5" fill="white" opacity=".97" />
+                <path d="M104 21C116 21 128 19 128 21C128 23 116 21 104 21Z" fill="white" opacity=".97" />
+                <path d="M12 21C8 12 4 7 2 7C4 7 10 12 12 21Z" fill="white" opacity=".92" />
+                <path d="M12 21C8 30 4 35 2 35C4 35 10 30 12 21Z" fill="white" opacity=".92" />
+                <path d="M64 22C52 38 28 44 14 42C28 37 56 30 64 22Z" fill="white" opacity=".88" />
+                <path d="M64 20C52 4 28 -2 14 0C28 5 56 12 64 20Z" fill="white" opacity=".88" />
+                <path d="M16 22C12 27 6 29 3 28C7 27 12 25 16 22Z" fill="white" opacity=".82" />
+                <path d="M16 20C12 15 6 13 3 14C7 15 12 17 16 20Z" fill="white" opacity=".82" />
+                <ellipse cx="52" cy="28" rx="12" ry="4" fill="#e0e8f0" opacity=".68" />
+                <ellipse cx="52" cy="14" rx="12" ry="4" fill="#e0e8f0" opacity=".68" />
+                <circle cx="78" cy="19" r="2.4" fill="#b8d4f5" opacity=".75" />
+                <circle cx="87" cy="18.5" r="2.4" fill="#b8d4f5" opacity=".75" />
+                <circle cx="96" cy="18.5" r="2.4" fill="#b8d4f5" opacity=".72" />
+                <circle cx="105" cy="19" r="2.4" fill="#b8d4f5" opacity=".65" />
+            </svg>
+        </div>
+    </div>
+
+    <div class="overlay"></div>
+
+    <!-- ══ STAGE ══ -->
+    <div class="stage">
+        <div class="card" id="card">
+
+            <a href="create-trip.html" class="back-link">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <polyline points="15 18 9 12 15 6" />
+                </svg>
+                Back to Trip
+            </a>
+
+            <!-- Header -->
+            <div class="card-header">
+                <div class="header-icon">🗺️</div>
+                <h1 class="card-title">Dynamic Itinerary</h1>
+                <p class="card-sub">Map out every step of your journey</p>
+            </div>
+
+            <!-- Divider -->
+            <div class="div-row">
+                <span class="div-line"></span>
+                <span class="div-ico">◆ &nbsp; DATES &nbsp; ◆</span>
+                <span class="div-line"></span>
+            </div>
+
+            <div class="form">
+                <div class="date-row">
+                    <div class="field">
+                        <label class="field-label">Start Date</label>
+                        <div class="input-wrap">
+                            <input type="date" class="input" id="start">
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label class="field-label">End Date</label>
+                        <div class="input-wrap">
+                            <input type="date" class="input" id="end">
+                        </div>
+                    </div>
+                </div>
+
+                <button class="btn-login btn-secondary" onclick="generate()" style="margin-top: 10px;">
+                    <span class="btn-text" style="color: inherit">Generate Days</span>
+                </button>
+
+                <div id="container"></div>
+
+                <button class="btn-login" id="proceedBtn" style="display: none; margin-top: 20px;"
+                    onclick="window.location.href='review.html'">
+                    <span class="btn-text">Save & Proceed to Review</span>
+                </button>
+
+            </div>
+
+        </div>
+    </div>
+
+    <!-- AI Chatbox Button -->
+    <a href="Chatbot.html" class="ai-chat-btn" onclick="localStorage.setItem('chatbot_source','Itinerary.html')">
+        <svg class="ai-chat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            <path d="M12 7L13.5 10.5L17 12L13.5 13.5L12 17L10.5 13.5L7 12L10.5 10.5L12 7Z" fill="currentColor"></path>
+        </svg>
+        <span>AI-chatbox</span>
+    </a>
+
+
+    <script>
+        /* ══ Stars ══ */
+        (function () {
+            const c = document.getElementById('starCanvas');
+            const ctx = c.getContext('2d');
+            let stars = [], W, H;
+            function resize() { W = c.width = window.innerWidth; H = c.height = window.innerHeight; build(); }
+            function build() {
+                stars = [];
+                for (let i = 0; i < 85; i++) stars.push({
+                    x: Math.random() * W, y: Math.random() * H * 0.58,
+                    r: Math.random() * 1.5 + 0.3, a: Math.random(),
+                    da: (Math.random() * .011 + .004) * (Math.random() < .5 ? 1 : -1),
+                    maxA: Math.random() * .65 + .3
+                });
+            }
+            function draw() {
+                ctx.clearRect(0, 0, W, H);
+                stars.forEach(s => {
+                    s.a += s.da;
+                    if (s.a > s.maxA || s.a < 0.05) s.da *= -1;
+                    ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(255,245,220,${s.a})`; ctx.fill();
+                });
+                requestAnimationFrame(draw);
+            }
+            window.addEventListener('resize', resize);
+            resize(); draw();
+        })();
+
+        /* ══ Generator Logic ══ */
+        function generate() {
+            const start = new Date(document.getElementById("start").value);
+            const end = new Date(document.getElementById("end").value);
+
+            if (!document.getElementById("start").value || !document.getElementById("end").value || end < start) {
+                alert("Please select valid dates.");
+                return;
+            }
+
+            const container = document.getElementById("container");
+            container.innerHTML = "";
+
+            let dayCount = 1;
+
+            for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+                const div = document.createElement("div");
+                div.className = "day";
+
+                div.innerHTML = `
+              <div class="day-title">Day ${dayCount} — ${d.toDateString()}</div>
+              
+              <div class="field">
+                  <div class="input-wrap">
+                      <input type="text" placeholder="Morning Activity" class="input">
+                  </div>
+              </div>
+              <div class="field">
+                  <div class="input-wrap">
+                      <input type="text" placeholder="Afternoon Activity" class="input">
+                  </div>
+              </div>
+              <div class="field">
+                  <div class="input-wrap">
+                      <input type="text" placeholder="Evening Activity" class="input">
+                  </div>
+              </div>
+              <div class="field">
+                  <div class="input-wrap">
+                      <textarea placeholder="Notes..." class="input"></textarea>
+                  </div>
+              </div>
+            `;
+
+                container.appendChild(div);
+                div.style.animationDelay = `${dayCount * 0.15}s`;
+                dayCount++;
+            }
+
+            document.getElementById("proceedBtn").style.display = "flex";
+
+            // Scroll down smoothly to show new days
+            setTimeout(() => {
+                const card = document.querySelector('.card');
+                card.scrollTo({ top: card.scrollHeight, behavior: 'smooth' });
+            }, 100);
+        }
+
+        // Attempt to pre-fill dates if available in localStorage
+        window.onload = () => {
+            try {
+                const tripData = JSON.parse(localStorage.getItem('tripData'));
+                if (tripData && tripData.startDate && tripData.endDate) {
+                    document.getElementById('start').value = tripData.startDate;
+                    document.getElementById('end').value = tripData.endDate;
+                    generate();
+                }
+            } catch (e) { }
+        }
+    </script>
+</body>
+
+</html>

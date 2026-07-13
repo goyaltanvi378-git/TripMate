@@ -1,0 +1,1954 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Trip Details — TripMate</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+
+    <style>
+        /* ─── RESET & BASE ─────────────────────────────────────────────────────── */
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-deep: #050b18;
+            --bg-mid: #0a1628;
+            --bg-surface: #0f1e38;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.12);
+            --glass-hover: rgba(255, 255, 255, 0.09);
+            --accent: #f59e0b;
+            --accent2: #38bdf8;
+            --accent3: #a78bfa;
+            --accent-glow: rgba(245, 158, 11, 0.35);
+            --red: #ef4444;
+            --green: #10b981;
+            --text-primary: #f0f6ff;
+            --text-secondary: #94a3b8;
+            --text-muted: #475569;
+            --shadow-xl: 0 25px 60px rgba(0, 0, 0, 0.6);
+            --radius-lg: 24px;
+            --radius-md: 16px;
+            --radius-sm: 10px;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg-deep);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* ─── LOADING SCREEN ────────────────────────────────────────────────────── */
+        #loader {
+            position: fixed;
+            inset: 0;
+            background: var(--bg-deep);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            transition: opacity 0.6s ease, visibility 0.6s ease;
+        }
+
+        #loader.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .loader-logo {
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.5px;
+        }
+
+        .loader-ring {
+            width: 52px;
+            height: 52px;
+            border: 3px solid rgba(255, 255, 255, 0.08);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.9s linear infinite;
+        }
+
+        .loader-dots {
+            display: flex;
+            gap: 8px;
+        }
+
+        .loader-dots span {
+            width: 8px;
+            height: 8px;
+            background: var(--accent2);
+            border-radius: 50%;
+            animation: bounce-dot 1.2s ease-in-out infinite;
+        }
+
+        .loader-dots span:nth-child(2) {
+            animation-delay: 0.2s;
+            background: var(--accent);
+        }
+
+        .loader-dots span:nth-child(3) {
+            animation-delay: 0.4s;
+            background: var(--accent3);
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes bounce-dot {
+
+            0%,
+            80%,
+            100% {
+                transform: scale(0.6);
+                opacity: 0.4;
+            }
+
+            40% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* ─── BACKGROUND CANVAS ─────────────────────────────────────────────────── */
+        #bg-canvas {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ─── MOUNTAIN SILHOUETTE ────────────────────────────────────────────────── */
+        .mountains {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 40vh;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        /* ─── AURORA ─────────────────────────────────────────────────────────────── */
+        .aurora {
+            position: fixed;
+            top: -20%;
+            left: -10%;
+            width: 120%;
+            height: 60%;
+            background: radial-gradient(ellipse 80% 50% at 50% 0%,
+                    rgba(56, 189, 248, 0.12) 0%,
+                    rgba(167, 139, 250, 0.08) 40%,
+                    transparent 70%);
+            animation: aurora-drift 12s ease-in-out infinite alternate;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        @keyframes aurora-drift {
+            from {
+                transform: translateX(-5%) scaleY(1);
+            }
+
+            to {
+                transform: translateX(5%) scaleY(1.1);
+            }
+        }
+
+        /* ─── LAYOUT ─────────────────────────────────────────────────────────────── */
+        .page-wrapper {
+            position: relative;
+            z-index: 2;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 32px 16px 120px;
+        }
+
+        /* ─── NAVBAR ─────────────────────────────────────────────────────────────── */
+        nav {
+            width: 100%;
+            max-width: 900px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 28px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 100px;
+            margin-bottom: 48px;
+            animation: slide-down 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+
+        @keyframes slide-down {
+            from {
+                opacity: 0;
+                transform: translateY(-24px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .nav-logo {
+            font-size: 1.25rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-logo i {
+            font-size: 1rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 6px;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            font-weight: 500;
+            text-decoration: none;
+            padding: 7px 16px;
+            border-radius: 100px;
+            transition: all 0.25s;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--text-primary);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        /* ─── PAGE HEADER ────────────────────────────────────────────────────────── */
+        .page-header {
+            text-align: center;
+            margin-bottom: 36px;
+            animation: fade-up 0.7s 0.15s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+
+        .page-header .eyebrow {
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: var(--accent);
+            background: rgba(245, 158, 11, 0.12);
+            border: 1px solid rgba(245, 158, 11, 0.25);
+            display: inline-block;
+            padding: 5px 16px;
+            border-radius: 100px;
+            margin-bottom: 14px;
+        }
+
+        .page-header h1 {
+            font-size: clamp(2rem, 5vw, 3.2rem);
+            font-weight: 800;
+            line-height: 1.1;
+            letter-spacing: -0.03em;
+        }
+
+        .page-header h1 span {
+            background: linear-gradient(135deg, var(--accent) 0%, #fb923c 50%, var(--accent2) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .page-header p {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            font-weight: 400;
+            margin-top: 10px;
+        }
+
+        @keyframes fade-up {
+            from {
+                opacity: 0;
+                transform: translateY(28px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ─── MAIN CARD ───────────────────────────────────────────────────────────── */
+        .trip-card {
+            width: 100%;
+            max-width: 760px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(28px) saturate(180%);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: var(--shadow-xl), 0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+            animation: card-entrance 0.8s 0.25s cubic-bezier(0.16, 1, 0.3, 1) both;
+            position: relative;
+        }
+
+        @keyframes card-entrance {
+            from {
+                opacity: 0;
+                transform: translateY(40px) scale(0.97);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* glowing edge */
+        .trip-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: var(--radius-lg);
+            padding: 1px;
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.4), transparent 40%, rgba(56, 189, 248, 0.3) 100%);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+        }
+
+        /* ─── CARD HERO BANNER ────────────────────────────────────────────────────── */
+        .card-hero {
+            position: relative;
+            height: 200px;
+            background: linear-gradient(135deg, #0f2744 0%, #1a1040 50%, #0c1e36 100%);
+            overflow: hidden;
+            display: flex;
+            align-items: flex-end;
+            padding: 24px 28px;
+        }
+
+        .card-hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='200' viewBox='0 0 600 200'%3E%3Cpath d='M0,180 L60,140 L120,155 L200,100 L280,130 L350,80 L430,110 L500,60 L560,85 L600,70 L600,200 L0,200Z' fill='%23172a4a' opacity='0.6'/%3E%3Cpath d='M0,200 L80,160 L160,175 L240,130 L310,150 L380,105 L460,135 L530,90 L600,115 L600,200Z' fill='%230d1e36' opacity='0.8'/%3E%3C/svg%3E") center/cover no-repeat;
+        }
+
+        /* stars */
+        .card-hero::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image:
+                radial-gradient(1.5px 1.5px at 15% 20%, rgba(255, 255, 255, 0.9) 0%, transparent 100%),
+                radial-gradient(1px 1px at 35% 12%, rgba(255, 255, 255, 0.7) 0%, transparent 100%),
+                radial-gradient(1.5px 1.5px at 55% 25%, rgba(255, 255, 255, 0.8) 0%, transparent 100%),
+                radial-gradient(1px 1px at 72% 8%, rgba(255, 255, 255, 0.6) 0%, transparent 100%),
+                radial-gradient(2px 2px at 85% 18%, rgba(255, 255, 255, 0.9) 0%, transparent 100%),
+                radial-gradient(1px 1px at 92% 35%, rgba(255, 255, 255, 0.5) 0%, transparent 100%),
+                radial-gradient(1.5px 1.5px at 8% 40%, rgba(255, 255, 255, 0.7) 0%, transparent 100%),
+                radial-gradient(1px 1px at 45% 40%, rgba(255, 255, 255, 0.6) 0%, transparent 100%),
+                radial-gradient(1.5px 1.5px at 28% 50%, rgba(255, 255, 255, 0.5) 0%, transparent 100%),
+                radial-gradient(1px 1px at 66% 45%, rgba(255, 255, 255, 0.8) 0%, transparent 100%);
+        }
+
+        .card-hero-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .trip-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(245, 158, 11, 0.2);
+            border: 1px solid rgba(245, 158, 11, 0.4);
+            color: var(--accent);
+            font-size: 0.72rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            padding: 5px 12px;
+            border-radius: 100px;
+            margin-bottom: 10px;
+        }
+
+        .hero-trip-name {
+            font-size: clamp(1.4rem, 3vw, 1.8rem);
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            line-height: 1.15;
+            text-shadow: 0 2px 16px rgba(0, 0, 0, 0.5);
+        }
+
+        /* status pill */
+        .status-pill {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.35);
+            color: var(--green);
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 6px 14px;
+            border-radius: 100px;
+            z-index: 2;
+        }
+
+        .status-dot {
+            width: 7px;
+            height: 7px;
+            background: var(--green);
+            border-radius: 50%;
+            animation: pulse-dot 1.8s ease-in-out infinite;
+        }
+
+        @keyframes pulse-dot {
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.5;
+                transform: scale(0.7);
+            }
+        }
+
+        /* ─── CARD BODY ───────────────────────────────────────────────────────────── */
+        .card-body {
+            padding: 32px 28px 28px;
+        }
+
+        /* ─── FORM ────────────────────────────────────────────────────────────────── */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+            margin-bottom: 28px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group.full {
+            grid-column: 1 / -1;
+        }
+
+        .form-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+
+        .form-label i {
+            color: var(--accent);
+            font-size: 0.8rem;
+        }
+
+        .input-wrap {
+            position: relative;
+        }
+
+        .input-wrap .field-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            pointer-events: none;
+            transition: color 0.2s;
+        }
+
+        input,
+        select,
+        datalist {
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .form-input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            font-weight: 500;
+            padding: 13px 14px 13px 40px;
+            outline: none;
+            transition: all 0.25s;
+            appearance: none;
+        }
+
+        .form-input::placeholder {
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        .form-input:focus {
+            border-color: rgba(245, 158, 11, 0.5);
+            background: rgba(255, 255, 255, 0.07);
+            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+        }
+
+        .form-input:focus+.field-icon,
+        .input-wrap:focus-within .field-icon {
+            color: var(--accent);
+        }
+
+        /* validation states */
+        .form-input.valid {
+            border-color: rgba(16, 185, 129, 0.5);
+        }
+
+        .form-input.invalid {
+            border-color: rgba(239, 68, 68, 0.5);
+        }
+
+        .form-input.valid:focus {
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.12);
+        }
+
+        .form-input.invalid:focus {
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12);
+        }
+
+        .validation-msg {
+            font-size: 0.75rem;
+            font-weight: 500;
+            margin-top: 4px;
+            display: none;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .validation-msg.show {
+            display: flex;
+        }
+
+        .validation-msg.error {
+            color: #f87171;
+        }
+
+        .validation-msg.success {
+            color: #34d399;
+        }
+
+        /* Budget display */
+        .budget-display {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(245, 158, 11, 0.08);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+            border-radius: var(--radius-sm);
+            padding: 13px 16px;
+        }
+
+        .budget-icon {
+            width: 36px;
+            height: 36px;
+            background: rgba(245, 158, 11, 0.2);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            color: var(--accent);
+            flex-shrink: 0;
+        }
+
+        .budget-label {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .budget-value {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--accent);
+            letter-spacing: -0.02em;
+        }
+
+        /* ─── INFO CHIPS ──────────────────────────────────────────────────────────── */
+        .info-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 28px;
+        }
+
+        .chip {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.09);
+            border-radius: 100px;
+            padding: 8px 16px;
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+            transition: all 0.25s;
+        }
+
+        .chip:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text-primary);
+        }
+
+        .chip i {
+            font-size: 0.75rem;
+            color: var(--accent2);
+        }
+
+        /* ─── DIVIDER ─────────────────────────────────────────────────────────────── */
+        .divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--glass-border), transparent);
+            margin: 24px 0;
+        }
+
+        /* ─── ACTION BUTTONS ──────────────────────────────────────────────────────── */
+        .action-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            flex: 1;
+            min-width: 130px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 13px 20px;
+            border-radius: var(--radius-sm);
+            border: none;
+            cursor: pointer;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 600;
+            letter-spacing: 0.01em;
+            text-decoration: none;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(255, 255, 255, 0);
+            transition: background 0.2s;
+        }
+
+        .btn:hover::after {
+            background: rgba(255, 255, 255, 0.07);
+        }
+
+        .btn-edit {
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.2) 0%, rgba(99, 102, 241, 0.2) 100%);
+            border: 1px solid rgba(56, 189, 248, 0.35);
+            color: var(--accent2);
+        }
+
+        .btn-edit:hover {
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.3) 0%, rgba(99, 102, 241, 0.3) 100%);
+            box-shadow: 0 4px 20px rgba(56, 189, 248, 0.25);
+            transform: translateY(-2px);
+        }
+
+        .btn-delete {
+            background: rgba(239, 68, 68, 0.12);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #f87171;
+        }
+
+        .btn-delete:hover {
+            background: rgba(239, 68, 68, 0.22);
+            box-shadow: 0 4px 20px rgba(239, 68, 68, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .btn-share {
+            background: linear-gradient(135deg, var(--accent) 0%, #fb923c 100%);
+            border: none;
+            color: #0a0a0a;
+            box-shadow: 0 4px 20px rgba(245, 158, 11, 0.25);
+        }
+
+        .btn-share:hover {
+            box-shadow: 0 8px 32px rgba(245, 158, 11, 0.45);
+            transform: translateY(-2px);
+        }
+
+        /* ─── TOAST ───────────────────────────────────────────────────────────────── */
+        .toast-wrap {
+            position: fixed;
+            bottom: 90px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            z-index: 999;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .toast-wrap.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .toast {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(15, 28, 52, 0.92);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 100px;
+            padding: 12px 22px;
+            font-size: 0.88rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            white-space: nowrap;
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+        }
+
+        .toast i {
+            color: var(--accent);
+        }
+
+        /* ─── FLOATING GLOW BUTTON ────────────────────────────────────────────────── */
+        .fab {
+            position: fixed;
+            bottom: 32px;
+            right: 32px;
+            width: 58px;
+            height: 58px;
+            background: linear-gradient(135deg, var(--accent) 0%, #fb923c 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            color: #0a0a0a;
+            cursor: pointer;
+            z-index: 100;
+            box-shadow: 0 8px 32px rgba(245, 158, 11, 0.5), 0 0 0 0 rgba(245, 158, 11, 0.35);
+            animation: fab-pulse 2.5s ease-in-out infinite, fab-in 0.6s 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+            transition: transform 0.25s, box-shadow 0.25s;
+            border: none;
+        }
+
+        .fab:hover {
+            transform: scale(1.1);
+            box-shadow: 0 12px 48px rgba(245, 158, 11, 0.65), 0 0 0 0 rgba(245, 158, 11, 0.35);
+        }
+
+        @keyframes fab-pulse {
+
+            0%,
+            100% {
+                box-shadow: 0 8px 32px rgba(245, 158, 11, 0.5), 0 0 0 0 rgba(245, 158, 11, 0.35);
+            }
+
+            50% {
+                box-shadow: 0 8px 32px rgba(245, 158, 11, 0.5), 0 0 0 14px rgba(245, 158, 11, 0);
+            }
+        }
+
+        @keyframes fab-in {
+            from {
+                opacity: 0;
+                transform: scale(0);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .fab-tooltip {
+            position: absolute;
+            right: 68px;
+            background: rgba(15, 28, 52, 0.92);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            color: var(--text-primary);
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.8rem;
+            font-weight: 500;
+            padding: 7px 14px;
+            border-radius: 100px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+        }
+
+        .fab:hover .fab-tooltip {
+            opacity: 1;
+        }
+
+        /* ─── CONFIRM MODAL ───────────────────────────────────────────────────────── */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.65);
+            backdrop-filter: blur(8px);
+            z-index: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+        }
+
+        .modal-overlay.open {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            background: linear-gradient(135deg, #0f1e38 0%, #0a1220 100%);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            padding: 36px 32px;
+            max-width: 400px;
+            width: calc(100% - 32px);
+            text-align: center;
+            transform: scale(0.9) translateY(20px);
+            transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .modal-overlay.open .modal {
+            transform: scale(1) translateY(0);
+        }
+
+        .modal-icon {
+            width: 64px;
+            height: 64px;
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: #f87171;
+            margin: 0 auto 18px;
+        }
+
+        .modal h3 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .modal p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 24px;
+        }
+
+        .modal-actions button {
+            flex: 1;
+            padding: 12px;
+            border-radius: var(--radius-sm);
+            border: none;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .modal-cancel {
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            color: var(--text-secondary) !important;
+        }
+
+        .modal-cancel:hover {
+            background: rgba(255, 255, 255, 0.12) !important;
+            color: var(--text-primary) !important;
+        }
+
+        .modal-confirm {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: #fff !important;
+        }
+
+        .modal-confirm:hover {
+            box-shadow: 0 4px 20px rgba(239, 68, 68, 0.4);
+            transform: translateY(-1px);
+        }
+
+        /* ─── EDIT PANEL ──────────────────────────────────────────────────────────── */
+        .edit-banner {
+            display: none;
+            align-items: center;
+            gap: 10px;
+            background: rgba(56, 189, 248, 0.08);
+            border: 1px solid rgba(56, 189, 248, 0.25);
+            border-radius: var(--radius-sm);
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            font-size: 0.85rem;
+            color: var(--accent2);
+        }
+
+        .edit-banner.show {
+            display: flex;
+        }
+
+        /* ─── RESPONSIVE ──────────────────────────────────────────────────────────── */
+        @media (max-width: 600px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-group.full {
+                grid-column: 1;
+            }
+
+            .action-row {
+                flex-direction: column;
+            }
+
+            .btn {
+                min-width: auto;
+            }
+
+            nav {
+                padding: 12px 16px;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .card-body {
+                padding: 24px 18px 20px;
+            }
+        }
+
+        /* ─── EXPLORE SECTION ──────────────────────────────────────────────────────── */
+        .explore-section {
+            width: 100%;
+            max-width: 760px;
+            margin-top: 32px;
+            display: none;
+            animation: fade-up 0.6s ease both;
+        }
+
+        .explore-section.active {
+            display: block;
+        }
+
+        .itinerary-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .itinerary-day {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: 24px;
+            position: relative;
+            transition: transform 0.3s;
+            overflow: hidden;
+        }
+
+        .itinerary-day:hover {
+            transform: translateX(8px);
+            background: var(--glass-hover);
+        }
+
+        .itinerary-day::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: var(--accent);
+        }
+
+        .day-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .day-num {
+            background: var(--accent);
+            color: #000;
+            font-size: 0.75rem;
+            font-weight: 800;
+            padding: 4px 10px;
+            border-radius: 4px;
+        }
+
+        .day-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .day-content {
+            color: var(--text-secondary);
+            font-size: 0.92rem;
+            line-height: 1.6;
+        }
+
+        .day-spots {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 14px;
+        }
+
+        .spot-tag {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 100px;
+            padding: 4px 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--accent2);
+        }
+
+        /* ─── SCROLLBAR ───────────────────────────────────────────────────────────── */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-deep);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+    </style>
+</head>
+
+<body onload="loadTripDetails()">
+
+    <!-- ══ LOADING SCREEN ═══════════════════════════════════════════════════════════ -->
+    <div id="loader">
+        <div class="loader-logo"><i class="fas fa-compass"></i> TripMate</div>
+        <div class="loader-ring"></div>
+        <div class="loader-dots"><span></span><span></span><span></span></div>
+    </div>
+
+    <!-- ══ BACKGROUND ══════════════════════════════════════════════════════════════ -->
+    <canvas id="bg-canvas"></canvas>
+    <div class="aurora"></div>
+
+    <svg class="mountains" viewBox="0 0 1440 300" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <path
+            d="M0,300 L0,220 L120,160 L200,195 L310,120 L420,170 L540,90 L650,140 L770,60 L880,110 L990,45 L1100,95 L1210,30 L1340,80 L1440,50 L1440,300Z"
+            fill="rgba(10,22,44,0.7)" />
+        <path
+            d="M0,300 L0,250 L80,210 L180,235 L280,175 L380,205 L480,150 L580,185 L700,120 L800,155 L920,100 L1040,135 L1150,80 L1280,120 L1380,90 L1440,110 L1440,300Z"
+            fill="rgba(5,12,25,0.85)" />
+    </svg>
+
+    <!-- ══ PAGE ═════════════════════════════════════════════════════════════════════ -->
+    <div class="page-wrapper">
+
+        <!-- NAV -->
+        <nav>
+            <div class="nav-logo"><i class="fas fa-compass"></i> TripMate</div>
+            <div class="nav-links">
+                <a href="view-trips.html">Home</a>
+                <a href="view-trips.html?filter=My%20Trips">My Trips</a>
+                <a href="javascript:void(0)" class="active" id="navDetails" onclick="switchTab('details')">Details</a>
+                <a href="javascript:void(0)" id="navExplore" onclick="switchTab('explore')">Explore</a>
+            </div>
+        </nav>
+
+        <!-- HEADER -->
+        <div class="page-header">
+            <div class="eyebrow"><i class="fas fa-route"></i> &nbsp;Trip Details</div>
+            <h1>Plan Your <span>Dream Journey</span></h1>
+            <p>Manage and explore your upcoming Indian adventure</p>
+        </div>
+
+        <!-- MAIN CARD -->
+        <div class="trip-card" id="tripCard">
+
+            <!-- Hero -->
+            <div class="card-hero">
+                <div class="status-pill">
+                    <div class="status-dot"></div> Suggested
+                </div>
+                <div class="card-hero-content">
+                    <div class="trip-badge"><i class="fas fa-star"></i> Premium Trip</div>
+                    <div class="hero-trip-name" id="heroName">✈ Trip Details</div>
+                </div>
+            </div>
+
+            <!-- Body -->
+            <div class="card-body">
+
+                <!-- Edit mode banner -->
+                <div class="edit-banner" id="editBanner">
+                    <i class="fas fa-pen-to-square"></i>
+                    <span>You are in <strong>edit mode</strong>. Make your changes and save.</span>
+                </div>
+
+                <!-- Info chips -->
+                <div class="info-chips" id="infoChips">
+                    <div class="chip"><i class="fas fa-clock"></i> <span id="daysChip">7 Days</span></div>
+                    <div class="chip"><i class="fas fa-mountain"></i> <span id="typeChip">Adventure</span></div>
+                    <div class="chip"><i class="fas fa-users"></i> 2 Travellers</div>
+                    <div class="chip"><i class="fas fa-hotel"></i> Hotel Included</div>
+                </div>
+
+                <!-- Form grid -->
+                <div class="form-grid">
+
+                    <!-- Trip Name -->
+                    <div class="form-group full">
+                        <label class="form-label"><i class="fas fa-suitcase-rolling"></i> Trip Name</label>
+                        <div class="input-wrap">
+                            <input type="text" id="tripName" class="form-input" value=""
+                                placeholder="Enter trip name" />
+                            <i class="fas fa-suitcase-rolling field-icon"></i>
+                        </div>
+                    </div>
+
+                    <!-- Destination -->
+                    <div class="form-group full">
+                        <label class="form-label"><i class="fas fa-map-marker-alt"></i> Destination (India Only)</label>
+                        <div class="input-wrap">
+                            <input type="text" id="destination" class="form-input" value="" list="indian-cities"
+                                placeholder="Type an Indian city…" autocomplete="off" />
+                            <i class="fas fa-map-marker-alt field-icon"></i>
+                        </div>
+                        <datalist id="indian-cities"></datalist>
+                        <div class="validation-msg" id="destMsg"></div>
+                    </div>
+
+                    <!-- Start Date -->
+                    <div class="form-group">
+                        <label class="form-label"><i class="fas fa-calendar-plus"></i> Start Date</label>
+                        <div class="input-wrap">
+                            <input type="date" id="startDate" class="form-input" value="" />
+                            <i class="fas fa-calendar-plus field-icon"></i>
+                        </div>
+                        <div class="validation-msg" id="startMsg"></div>
+                    </div>
+
+                    <!-- End Date -->
+                    <div class="form-group">
+                        <label class="form-label"><i class="fas fa-calendar-check"></i> End Date</label>
+                        <div class="input-wrap">
+                            <input type="date" id="endDate" class="form-input" value="" />
+                            <i class="fas fa-calendar-check field-icon"></i>
+                        </div>
+                        <div class="validation-msg" id="endMsg"></div>
+                    </div>
+
+                    <!-- Budget -->
+                    <div class="form-group full">
+                        <label class="form-label"><i class="fas fa-wallet"></i> Budget (₹)</label>
+                        <div class="input-wrap">
+                            <input type="number" id="budget" class="form-input" value="" placeholder="Enter budget in ₹"
+                                min="0" />
+                            <i class="fas fa-wallet field-icon"></i>
+                        </div>
+                    </div>
+
+                </div><!-- /form-grid -->
+
+                <!-- Budget display card -->
+                <div class="budget-display">
+                    <div class="budget-icon"><i class="fas fa-indian-rupee-sign"></i></div>
+                    <div>
+                        <div class="budget-label">Total Budget</div>
+                        <div class="budget-value" id="budgetDisplay">₹ 0</div>
+                    </div>
+                </div>
+
+                <div class="divider"></div>
+
+                <!-- Actions -->
+                <div class="action-row">
+                    <button class="btn btn-edit" id="btnEdit" onclick="toggleEdit()">
+                        <i class="fas fa-pen-to-square"></i> Edit Trip
+                    </button>
+                    <button class="btn btn-delete" onclick="openDeleteModal()">
+                        <i class="fas fa-trash-can"></i> Delete Trip
+                    </button>
+                    <button class="btn btn-share" onclick="shareTrip()">
+                        <i class="fas fa-share-nodes"></i> Share Trip
+                    </button>
+                </div>
+
+            </div><!-- /card-body -->
+        </div><!-- /trip-card -->
+
+        <!-- EXPLORE SECTION -->
+        <div class="explore-section" id="exploreSection">
+            <div class="page-header" style="margin-bottom: 24px; text-align: left;">
+                <div class="eyebrow" style="margin-bottom: 8px;"><i class="fas fa-map-location-dot"></i> &nbsp;Suggested Itinerary</div>
+                <h2 style="font-size: 1.8rem; font-weight: 800;">Explore the <span id="exploreTripName">Journey</span></h2>
+            </div>
+            
+            <div class="itinerary-container" id="itineraryContainer">
+                <!-- Itinerary items will be injected here -->
+            </div>
+        </div>
+
+    </div><!-- /page-wrapper -->
+
+    <!-- ══ TOAST ════════════════════════════════════════════════════════════════════ -->
+    <div class="toast-wrap" id="toast">
+        <div class="toast">
+            <i class="fas fa-circle-check" id="toastIcon"></i>
+            <span id="toastMsg">Action completed</span>
+        </div>
+    </div>
+
+    <!-- ══ DELETE MODAL ═════════════════════════════════════════════════════════════ -->
+    <div class="modal-overlay" id="deleteModal">
+        <div class="modal">
+            <div class="modal-icon"><i class="fas fa-trash-can"></i></div>
+            <h3>Delete this trip?</h3>
+            <p>Are you sure you want to delete <strong id="modalTripName">this trip</strong>? This action cannot be
+                undone.</p>
+            <div class="modal-actions">
+                <button class="modal-cancel" onclick="closeDeleteModal()">Cancel</button>
+                <button class="modal-confirm" onclick="confirmDelete()">Yes, Delete</button>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        /* ─── INDIAN CITIES DATABASE ───────────────────────────────────────────────── */
+        const INDIAN_CITIES = [
+            "Agra, Uttar Pradesh", "Ahmedabad, Gujarat", "Aizawl, Mizoram",
+            "Ajmer, Rajasthan", "Allahabad, Uttar Pradesh", "Amritsar, Punjab",
+            "Aurangabad, Maharashtra", "Bengaluru, Karnataka", "Bhopal, Madhya Pradesh",
+            "Bhubaneswar, Odisha", "Chandigarh, Punjab", "Chennai, Tamil Nadu",
+            "Coorg, Karnataka", "Darjeeling, West Bengal", "Dehradun, Uttarakhand",
+            "Delhi", "Dwarka, Gujarat", "Goa", "Guwahati, Assam",
+            "Hampi, Karnataka", "Haridwar, Uttarakhand", "Hyderabad, Telangana",
+            "Indore, Madhya Pradesh", "Jaipur, Rajasthan", "Jaisalmer, Rajasthan",
+            "Jammu, Jammu & Kashmir", "Jodhpur, Rajasthan", "Kasol, Himachal Pradesh",
+            "Kochi, Kerala", "Kodaikanal, Tamil Nadu", "Kolkata, West Bengal",
+            "Kovalam, Kerala", "Leh, Ladakh", "Lucknow, Uttar Pradesh",
+            "Madurai, Tamil Nadu", "Manali, Himachal Pradesh", "Mahabalipuram, Tamil Nadu",
+            "Mumbai, Maharashtra", "Munnar, Kerala", "Mussoorie, Uttarakhand",
+            "Mysuru, Karnataka", "Nagpur, Maharashtra", "Nainital, Uttarakhand",
+            "Nashik, Maharashtra", "Ooty, Tamil Nadu", "Patna, Bihar",
+            "Puri, Odisha", "Pushkar, Rajasthan", "Rishikesh, Uttarakhand",
+            "Shimla, Himachal Pradesh", "Shillong, Meghalaya", "Srinagar, Jammu & Kashmir",
+            "Thiruvananthapuram, Kerala", "Udaipur, Rajasthan", "Vadodara, Gujarat",
+            "Varanasi, Uttar Pradesh", "Vijayawada, Andhra Pradesh", "Visakhapatnam, Andhra Pradesh",
+            "Pondicherry", "Andaman Islands", "Coimbatore, Tamil Nadu",
+            "Rann of Kutch, Gujarat", "Spiti Valley, Himachal Pradesh", "Zanskar, Ladakh"
+        ];
+
+        /* Populate datalist */
+        const datalist = document.getElementById('indian-cities');
+        INDIAN_CITIES.forEach(city => {
+            const opt = document.createElement('option');
+            opt.value = city;
+            datalist.appendChild(opt);
+        });
+
+        /* ─── VALIDATION: Indian destination only ──────────────────────────────────── */
+        function isIndianCity(val) {
+            const v = val.trim().toLowerCase();
+            if (!v) return false;
+            return INDIAN_CITIES.some(city =>
+                city.toLowerCase().includes(v) || v.includes(city.toLowerCase().split(',')[0])
+            );
+        }
+
+        const destInput = document.getElementById('destination');
+        const destMsg = document.getElementById('destMsg');
+
+        if (destInput) {
+            destInput.addEventListener('input', () => {
+                const v = destInput.value.trim();
+                if (!v) { resetValidation(destInput, destMsg); return; }
+                if (isIndianCity(v)) {
+                    setValid(destInput, destMsg, '✓ Valid Indian destination');
+                } else {
+                    setInvalid(destInput, destMsg, '✗ Only Indian destinations are allowed');
+                }
+            });
+            destInput.addEventListener('blur', () => {
+                const v = destInput.value.trim();
+                if (v && !isIndianCity(v)) {
+                    setInvalid(destInput, destMsg, '✗ Please select or enter a valid Indian city');
+                }
+            });
+        }
+
+        function setValid(el, msg, text) {
+            el.classList.remove('invalid'); el.classList.add('valid');
+            msg.className = 'validation-msg show success';
+            msg.innerHTML = `<i class="fas fa-circle-check"></i> ${text}`;
+        }
+        function setInvalid(el, msg, text) {
+            el.classList.remove('valid'); el.classList.add('invalid');
+            msg.className = 'validation-msg show error';
+            msg.innerHTML = `<i class="fas fa-circle-xmark"></i> ${text}`;
+        }
+        function resetValidation(el, msg) {
+            el.classList.remove('valid', 'invalid');
+            msg.className = 'validation-msg';
+            msg.innerHTML = '';
+        }
+
+        /* ─── DATE VALIDATION ───────────────────────────────────────────────────────── */
+        const startDate = document.getElementById('startDate');
+        const endDate = document.getElementById('endDate');
+        const startMsg = document.getElementById('startMsg');
+        const endMsg = document.getElementById('endMsg');
+
+        function validateDates() {
+            if (!startDate || !endDate) return true;
+            const s = new Date(startDate.value);
+            const e = new Date(endDate.value);
+            const today = new Date(); today.setHours(0, 0, 0, 0);
+
+            resetValidation(startDate, startMsg);
+            resetValidation(endDate, endMsg);
+
+            if (startDate.value && s < today) {
+                setInvalid(startDate, startMsg, 'Start date cannot be in the past');
+                return false;
+            }
+            if (endDate.value && s >= e) {
+                setInvalid(endDate, endMsg, 'End date must be after start date');
+                return false;
+            }
+            if (startDate.value) setValid(startDate, startMsg, 'Valid start date');
+            if (endDate.value) setValid(endDate, endMsg, 'Valid end date');
+
+            /* update duration chip */
+            if (startDate.value && endDate.value) {
+                const days = Math.round((e - s) / 86400000);
+                const daysChip = document.getElementById('daysChip');
+                if (daysChip) daysChip.textContent = days + ' Day' + (days !== 1 ? 's' : '');
+            }
+            return true;
+        }
+        if (startDate) startDate.addEventListener('change', validateDates);
+        if (endDate) endDate.addEventListener('change', validateDates);
+
+        /* ─── BUDGET LIVE UPDATE ────────────────────────────────────────────────────── */
+        const budgetInput = document.getElementById('budget');
+        const budgetDisplay = document.getElementById('budgetDisplay');
+        if (budgetInput) {
+            budgetInput.addEventListener('input', () => {
+                const v = parseInt(budgetInput.value) || 0;
+                if (budgetDisplay) budgetDisplay.textContent = '₹ ' + v.toLocaleString('en-IN');
+            });
+        }
+
+        /* ─── HERO NAME SYNC ────────────────────────────────────────────────────────── */
+        const tripNameInput = document.getElementById('tripName');
+        const heroName = document.getElementById('heroName');
+        if (tripNameInput) {
+            tripNameInput.addEventListener('input', () => {
+                if (heroName) heroName.textContent = '✈ ' + (tripNameInput.value || 'Your Trip');
+            });
+        }
+
+        /* ─── EDIT MODE TOGGLE ───────────────────────────────────────────────────────── */
+        let editMode = false;
+        async function toggleEdit() {
+            const data = localStorage.getItem("selectedTrip");
+            if (!data) return;
+            const trip = JSON.parse(data);
+
+            const btn = document.getElementById('btnEdit');
+            const banner = document.getElementById('editBanner');
+            const inputs = document.querySelectorAll('.form-input');
+
+            if (!editMode) {
+                // EDIT MODE ON
+                editMode = true;
+                inputs.forEach(i => { i.readOnly = false; i.style.cursor = 'text'; });
+                btn.innerHTML = '<i class="fas fa-floppy-disk"></i> Save Trip';
+                btn.style.background = 'linear-gradient(135deg,rgba(16,185,129,.25),rgba(5,150,105,.25))';
+                btn.style.borderColor = 'rgba(16,185,129,.4)';
+                btn.style.color = '#34d399';
+                if (banner) banner.classList.add('show');
+                showToast('info', 'Edit mode activated');
+            } else {
+                // SAVE MODE
+                if (!validateForm()) return;
+                
+                try {
+                    btn.disabled = true;
+                    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+                    
+                    const updatedTrip = {
+                        ...trip,
+                        tripId: trip.tripId || trip.id, // Explicit ID for Database
+                        tripName: document.getElementById('tripName').value,
+                        location: document.getElementById('destination').value,
+                        date: document.getElementById('startDate').value,
+                        endDate: document.getElementById('endDate').value,
+                        budget: document.getElementById('budget').value,
+                        userEmail: localStorage.getItem('userEmail') || trip.userEmail
+                    };
+
+                    console.log("Sending data to API:", updatedTrip); // Debugging ke liye
+
+                    const res = await fetch('https://64i5lx3iqg.execute-api.us-east-1.amazonaws.com/saveTrip', {
+                        method: 'POST',
+                        body: JSON.stringify(updatedTrip)
+                    });
+
+                    if (res.ok) {
+                        localStorage.setItem('selectedTrip', JSON.stringify(updatedTrip));
+                        showToast('success', 'Changes saved successfully! ✈️');
+                        
+                        // Success ke baad mode off karo
+                        editMode = false;
+                        inputs.forEach(i => { i.readOnly = true; i.style.cursor = 'default'; });
+                        btn.innerHTML = '<i class="fas fa-pen-to-square"></i> Edit Trip';
+                        btn.style.background = '';
+                        btn.style.borderColor = '';
+                        btn.style.color = '';
+                        if (banner) banner.classList.remove('show');
+                    } else {
+                        throw new Error('Save failed');
+                    }
+                } catch (err) {
+                    console.error(err);
+                    showToast('error', 'Failed to save changes ❌');
+                    btn.innerHTML = '<i class="fas fa-floppy-disk"></i> Save Trip';
+                } finally {
+                    btn.disabled = false;
+                }
+            }
+        }
+
+        function validateForm() {
+            const dest = document.getElementById('destination').value.trim();
+            if (dest && !isIndianCity(dest)) {
+                if (typeof destInput !== 'undefined' && typeof destMsg !== 'undefined') {
+                    setInvalid(destInput, destMsg, '✗ Only Indian destinations are allowed');
+                }
+                document.getElementById('destination').focus();
+                showToast('error', 'Invalid destination – India only!');
+                return false;
+            }
+            return validateDates();
+        }
+
+        /* Disable inputs by default (view mode) */
+        document.querySelectorAll('.form-input').forEach(i => {
+            i.readOnly = true; i.style.cursor = 'default';
+        });
+
+        /* ─── DELETE MODAL ───────────────────────────────────────────────────────────── */
+        function openDeleteModal() {
+            if (tripNameInput) document.getElementById('modalTripName').textContent = '"' + tripNameInput.value + '"';
+            document.getElementById('deleteModal').classList.add('open');
+        }
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').classList.remove('open');
+        }
+        async function confirmDelete() {
+            const data = localStorage.getItem("selectedTrip");
+            if (!data) return;
+            const trip = JSON.parse(data);
+            const userEmail = localStorage.getItem("userEmail");
+
+            closeDeleteModal();
+            showToast('info', 'Deleting trip...');
+
+            // Agar personal trip hai (My Trip status ya non-Suggested), toh API call karo
+            // Note: view.html doesn't explicitly store status in the card but loadTripDetails shows it.
+            // Hum assume kar sakte hain agar user logged in hai aur trip suggested nahi hai
+            
+            try {
+                const res = await fetch("https://64i5lx3iqg.execute-api.us-east-1.amazonaws.com/getTrips/deleteTrip", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ 
+                        tripId: String(trip.tripId || trip.id), 
+                        userEmail: userEmail 
+                    })
+                });
+                
+                if (res.ok) {
+                    showToast('delete', 'Trip deleted successfully');
+                    setTimeout(() => {
+                        window.location.href = 'view-trips.html';
+                    }, 1500);
+                } else {
+                    throw new Error("Delete failed");
+                }
+            } catch (err) {
+                console.error(err);
+                // Even if API fails, we can redirect or show error
+                showToast('error', 'Could not delete from server');
+                // Optional: redirect anyway if user wants it gone from view
+                setTimeout(() => {
+                    window.location.href = 'view-trips.html';
+                }, 2000);
+            }
+        }
+        document.getElementById('deleteModal').addEventListener('click', e => {
+            if (e.target === document.getElementById('deleteModal')) closeDeleteModal();
+        });
+
+        /* ─── SHARE ─────────────────────────────────────────────────────────────────── */
+        function shareTrip() {
+            const name = tripNameInput ? tripNameInput.value : "My Trip";
+            const dest = destInput ? destInput.value : "India";
+            // Trip ka link
+            const baseUrl = window.location.origin + window.location.pathname;
+            const tripData = JSON.parse(localStorage.getItem("selectedTrip") || "{}");
+            const link = `${baseUrl}?id=${tripData.id || tripData.tripId || ''}`;
+
+            // Naya text jisme link aur proper formatting hai
+            const text = `✈️ *${name}*\n📍 ${dest} | 📅 ${startDate.value} → ${endDate.value} | 💰 ₹${parseInt(budgetInput.value || 0).toLocaleString('en-IN')}\n\n*View my full itinerary here:*\n${link}`;
+            
+            // WhatsApp ka direct URL banaya gaya hai
+            const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+            
+            // Ye seedha WhatsApp open kar dega (Phone me app aur PC me WhatsApp Web)
+            window.open(whatsappUrl, '_blank');
+            showToast('share', 'Opening WhatsApp...');
+        }
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => showToast('share', 'Trip link copied to clipboard!'));
+        }
+
+        /* ─── TOAST ──────────────────────────────────────────────────────────────────── */
+        let toastTimer;
+        function showToast(type, msg) {
+            const wrap = document.getElementById('toast');
+            const icon = document.getElementById('toastIcon');
+            const text = document.getElementById('toastMsg');
+            if (!wrap || !icon || !text) return;
+            const map = {
+                success: ['fas fa-circle-check', '#34d399'],
+                error: ['fas fa-circle-xmark', '#f87171'],
+                delete: ['fas fa-trash-can', '#f87171'],
+                share: ['fas fa-share-nodes', '#a78bfa'],
+                info: ['fas fa-circle-info', '#38bdf8'],
+            };
+            const [cls, color] = map[type] || map.info;
+            icon.className = cls; icon.style.color = color;
+            text.textContent = msg;
+            wrap.classList.add('show');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => wrap.classList.remove('show'), 3000);
+        }
+
+        /* ─── STAR CANVAS ────────────────────────────────────────────────────────────── */
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+        let stars = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            initStars();
+        }
+
+        function initStars() {
+            stars = [];
+            const count = Math.floor((canvas.width * canvas.height) / 4000);
+            for (let i = 0; i < count; i++) {
+                stars.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height * 0.7,
+                    r: Math.random() * 1.5 + 0.2,
+                    alpha: Math.random() * 0.7 + 0.1,
+                    speed: Math.random() * 0.003 + 0.001,
+                    phase: Math.random() * Math.PI * 2,
+                    color: ['#fff', '#bde', '#fcf', '#eef'][Math.floor(Math.random() * 4)]
+                });
+            }
+        }
+
+        function animateStars(ts) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            /* gradient bg */
+            const grd = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            grd.addColorStop(0, '#020810');
+            grd.addColorStop(0.5, '#050c1c');
+            grd.addColorStop(1, '#030a18');
+            ctx.fillStyle = grd;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            /* shooting star (rare) */
+            if (Math.random() < 0.003) drawShootingStar();
+
+            stars.forEach(s => {
+                const a = s.alpha * (0.7 + 0.3 * Math.sin(ts * s.speed + s.phase));
+                ctx.beginPath();
+                ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+                ctx.fillStyle = s.color;
+                ctx.globalAlpha = a;
+                ctx.fill();
+            });
+            ctx.globalAlpha = 1;
+            requestAnimationFrame(animateStars);
+        }
+
+        function drawShootingStar() {
+            const x0 = Math.random() * canvas.width * 0.7;
+            const y0 = Math.random() * canvas.height * 0.3;
+            const len = 80 + Math.random() * 100;
+            const grd = ctx.createLinearGradient(x0, y0, x0 + len, y0 + len * 0.4);
+            grd.addColorStop(0, 'rgba(255,255,220,0)');
+            grd.addColorStop(0.3, 'rgba(255,255,200,0.8)');
+            grd.addColorStop(1, 'rgba(255,255,255,0)');
+            ctx.beginPath();
+            ctx.moveTo(x0, y0);
+            ctx.lineTo(x0 + len, y0 + len * 0.4);
+            ctx.strokeStyle = grd;
+            ctx.lineWidth = 1.5;
+            ctx.globalAlpha = 0.9;
+            ctx.stroke();
+            ctx.globalAlpha = 1;
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+        requestAnimationFrame(animateStars);
+
+        /* ─── LOADER ─────────────────────────────────────────────────────────────────── */
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                const loader = document.getElementById('loader');
+                if (loader) loader.classList.add('hidden');
+            }, 1800);
+        });
+
+        /* ─── DYNAMIC DATA LOADING ───────────────────────────────────────────────────── */
+        function loadTripDetails() {
+            const data = localStorage.getItem("selectedTrip");
+            if (!data) return;
+
+            const trip = JSON.parse(data);
+
+            // 🔥 UI me data inject
+            const heroNameEl = document.getElementById("heroName");
+            const tripNameInput = document.getElementById("tripName");
+            const destinationInput = document.getElementById("destination");
+            const startDateInput = document.getElementById("startDate");
+            const endDateInput = document.getElementById("endDate");
+            const budgetInput = document.getElementById("budget");
+            const budgetDisplay = document.getElementById("budgetDisplay");
+
+            const name = (trip.name || trip.tripName || "My Trip");
+            if (heroNameEl) heroNameEl.textContent = "✈ " + name;
+            if (tripNameInput) tripNameInput.value = name;
+
+            if (destinationInput) destinationInput.value = (trip.location || trip.destination || trip.city || "");
+            if (startDateInput) startDateInput.value = (trip.date || trip.startDate || "");
+            if (endDateInput) endDateInput.value = (trip.endDate || "");
+            if (budgetInput) budgetInput.value = trip.budget || 0;
+
+            if (budgetDisplay) {
+                const b = parseInt(trip.budget) || 0;
+                budgetDisplay.textContent = "₹ " + b.toLocaleString('en-IN');
+            }
+
+            const statusPill = document.querySelector(".status-pill");
+            if (statusPill) {
+                if (trip.status === 'Suggested') {
+                    statusPill.innerHTML = '<div class="status-dot"></div> Suggested';
+                } else {
+                    statusPill.innerHTML = '<div class="status-dot" style="background:#10b981"></div> My Trip';
+                }
+            }
+
+            // Update chips
+            const typeChip = document.getElementById("typeChip");
+            if (trip.tags && trip.tags.length > 0 && typeChip) {
+                typeChip.textContent = trip.tags[trip.tags.length - 1];
+            }
+
+            const daysChip = document.getElementById("daysChip");
+            if (trip.date && trip.endDate && daysChip) {
+                const s = new Date(trip.date);
+                const e = new Date(trip.endDate);
+                const diff = Math.round((e - s) / 86400000);
+                if (!isNaN(diff) && diff > 0) {
+                    daysChip.textContent = diff + " Days";
+                }
+            }
+        }
+
+        /* ─── TAB SWITCHING ─────────────────────────────────────────────────────────── */
+        function switchTab(tab) {
+            const detailsTab = document.getElementById('tripCard');
+            const exploreTab = document.getElementById('exploreSection');
+            const navDetails = document.getElementById('navDetails');
+            const navExplore = document.getElementById('navExplore');
+
+            if (tab === 'details') {
+                detailsTab.style.display = 'block';
+                exploreTab.classList.remove('active');
+                navDetails.classList.add('active');
+                navExplore.classList.remove('active');
+            } else {
+                detailsTab.style.display = 'none';
+                exploreTab.classList.add('active');
+                navDetails.classList.remove('active');
+                navExplore.classList.add('active');
+                renderItinerary();
+            }
+        }
+
+        /* ─── ITINERARY DATA ────────────────────────────────────────────────────────── */
+        const ITINERARIES = {
+            "Golden Triangle": [
+                { title: "Arrival in Delhi", desc: "Welcome to India's capital. Visit the majestic Red Fort and the towering Qutub Minar.", spots: ["Red Fort", "Qutub Minar", "Chandni Chowk"] },
+                { title: "Old Delhi Exploration", desc: "Explore the narrow lanes of Old Delhi, visit Jama Masjid, and enjoy famous street food.", spots: ["Jama Masjid", "Spice Market", "Raj Ghat"] },
+                { title: "Drive to Agra", desc: "Morning drive to the city of Love. Check-in and relax at your hotel near the Taj.", spots: ["Mehtab Bagh", "Agra Fort", "Local Craft"] },
+                { title: "The Taj Mahal Experience", desc: "Witness the Taj Mahal at sunrise. Later, explore the intricate beauty of the Baby Taj.", spots: ["Taj Mahal", "Itimad-ud-Daulah", "Kalakriti Show"] },
+                { title: "Journey to Jaipur", desc: "Stop at Fatehpur Sikri on the way to the Pink City of Rajasthan.", spots: ["Fatehpur Sikri", "Buland Darwaza", "Abhaneri Stepwell"] },
+                { title: "The Royal Jaipur", desc: "Visit the Amber Fort with its elephant rides and the iconic Hawa Mahal.", spots: ["Amber Fort", "Hawa Mahal", "City Palace"] }
+            ],
+            "Himalayan Escape": [
+                { title: "Arrival in Manali", desc: "Check in to your cozy mountain stay and breathe in the fresh Himalayan air.", spots: ["Hadimba Temple", "Mall Road", "Old Manali"] },
+                { title: "Solang Valley Adventure", desc: "Enjoy paragliding, zorbing, and breathtaking views of the snow-capped peaks.", spots: ["Solang Valley", "Rohtang Pass", "Anjani Mahadev"] },
+                { title: "Riverside Chill in Kasol", desc: "Drive to the 'Mini Israel' of India and relax by the crystal clear Parvati River.", spots: ["Parvati River", "Kasol Market", "Chalal Village"] },
+                { title: "Spiritual Trek to Manikaran", desc: "Visit the famous hot springs and the holy Gurudwara in the Parvati Valley.", spots: ["Manikaran Sahib", "Hot Springs", "Nature Walk"] },
+                { title: "Naggar Castle Visit", desc: "Explore the historic Naggar Castle and enjoy the local Art Gallery.", spots: ["Naggar Castle", "Roerich Gallery", "Apple Orchards"] }
+            ],
+            "Kerala Backwaters": [
+                { title: "Munnar Tea Gardens", desc: "Start your journey in the lush green tea hills of Munnar.", spots: ["Tea Museum", "Eravikulam Park", "Mattupetty Dam"] },
+                { title: "Houseboat in Alleppey", desc: "Experience the ultimate relaxation on a traditional houseboat floating through backwaters.", spots: ["Vembanad Lake", "Paddy Fields", "Local Cuisine"] },
+                { title: "Coastal Kochi", desc: "Explore the historic Fort Kochi and witness the iconic Chinese Fishing Nets.", spots: ["Fort Kochi", "Mattancherry Palace", "Marine Drive"] },
+                { title: "Periyar Wildlife", desc: "Take a boat safari in Periyar Lake to spot wild elephants and unique birds.", spots: ["Periyar Lake", "Elephant Junction", "Spice Plantation"] },
+                { title: "Varkala Cliff Sunset", desc: "Relax at the stunning cliffs of Varkala overlooking the Arabian Sea.", spots: ["Varkala Beach", "Janardhana Temple", "Cliff Market"] }
+            ],
+            "Ladakh Adventure": [
+                { title: "Acclimatization in Leh", desc: "Rest and get used to the high altitude. Visit the local Leh Palace in the evening.", spots: ["Leh Palace", "Shanti Stupa", "Leh Market"] },
+                { title: "Magnetic Hill & Sangam", desc: "See the gravity-defying Magnetic Hill and the confluence of Indus and Zanskar rivers.", spots: ["Magnetic Hill", "Sangam", "Hall of Fame"] },
+                { title: "Nubra Valley Crossing", desc: "Drive over Khardung La, one of the world's highest motorable roads.", spots: ["Khardung La", "Diskit Monastery", "Hunder Dunes"] },
+                { title: "Pangong Lake Bliss", desc: "Behold the changing colors of the high-altitude Pangong Lake.", spots: ["Pangong Tso", "Shooting Point", "Camping"] },
+                { title: "Hemis Monastery", desc: "Visit the largest and wealthiest monastery in Ladakh.", spots: ["Hemis Monastery", "Thiksey", "Shey Palace"] }
+            ],
+            "Goa Party Week": [
+                { title: "North Goa Beaches", desc: "Relax at Baga and Calangute. Enjoy the vibrant shacks and water sports.", spots: ["Baga Beach", "Calangute", "Tito's Lane"] },
+                { title: "Fort Aguada & Panjim", desc: "Visit the historic Portuguese fort and explore the colorful streets of Fontainhas.", spots: ["Fort Aguada", "Fontainhas", "Miramar Beach"] },
+                { title: "South Goa Serenity", desc: "Head to the peaceful beaches of Palolem and Colva for a quiet sunset.", spots: ["Palolem Beach", "Colva", "Cabo de Rama"] },
+                { title: "Dudhsagar Falls", desc: "Take a jeep safari to the majestic 'Sea of Milk' waterfalls.", spots: ["Dudhsagar Falls", "Mollem Park", "Spice Farm"] },
+                { title: "Old Goa Heritage", desc: "Explore the stunning churches of Old Goa and the Basilica of Bom Jesus.", spots: ["Bom Jesus", "Se Cathedral", "Museum"] }
+            ],
+            "Udaipur Royals": [
+                { title: "City Palace & Lake Pichola", desc: "Explore the grand City Palace and take a boat ride on the serene Lake Pichola.", spots: ["City Palace", "Lake Pichola", "Jag Mandir"] },
+                { title: "Saheliyon-ki-Bari", desc: "Visit the beautiful gardens and the Monsoon Palace for panoramic views.", spots: ["Fateh Sagar", "Sajjangarh", "Vintage Cars"] },
+                { title: "Kumbhalgarh Fort", desc: "Full day excursion to the fort with the second longest wall in the world.", spots: ["Kumbhalgarh", "Ranakpur", "Temple"] },
+                { title: "Chittorgarh Fort", desc: "Explore the massive hilltop fort, a symbol of Rajput bravery.", spots: ["Vijay Stambh", "Padmini Palace", "Gaumukh Reservoir"] },
+                { title: "Shilpgram Art Village", desc: "Discover local Rajasthani crafts, pottery, and traditional folk dances.", spots: ["Shilpgram", "Bagore Ki Haveli", "Local Market"] }
+            ],
+            "Andaman Escape": [
+                { title: "Cellular Jail & Light Show", desc: "Learn about India's history at the Cellular Jail followed by a sound & light show.", spots: ["Cellular Jail", "Corbyn's Cove", "Light Show"] },
+                { title: "Havelock Island (Radhanagar)", desc: "Spend the day at Radhanagar Beach, one of the best in Asia.", spots: ["Radhanagar Beach", "Scuba Diving", "Elephant Beach"] },
+                { title: "Neil Island (Bharatpur)", desc: "Explore the coral reefs and white sands of Neil Island.", spots: ["Bharatpur Beach", "Laxmanpur", "Natural Bridge"] },
+                { title: "Ross Island & North Bay", desc: "Visit the historic ruins of Ross Island and enjoy coral viewing at North Bay.", spots: ["Ross Island", "Coral Safari", "North Bay"] },
+                { title: "Chidiya Tapu Sunset", desc: "End your day with a beautiful sunset at the birdwatcher's paradise.", spots: ["Munda Pahar", "Sunset Point", "Bird Watching"] }
+            ],
+            "Rishikesh Yoga": [
+                { title: "Ganga Aarti & Yoga", desc: "Experience the spiritual evening Aarti and start your morning with a Yoga session.", spots: ["Triveni Ghat", "Laxman Jhula", "Beatles Ashram"] },
+                { title: "Rafting Adventure", desc: "Take on the rapids of the Ganges for an adrenaline-pumping experience.", spots: ["Shivpuri", "Jumpin Heights", "Neer Garh Waterfall"] },
+                { title: "Vashistha Cave", desc: "Meditate in the ancient cave on the banks of the holy river Ganges.", spots: ["Vashistha Cave", "Kunjapuri", "Trekking"] },
+                { title: "Haridwar (Har Ki Pauri)", desc: "Visit the holy city of Haridwar and witness the grand Aarti ceremony.", spots: ["Har Ki Pauri", "Mansa Devi", "Chandi Devi"] },
+                { title: "Cafe Hopping", desc: "Relax at the famous Little Buddha or Freedom Cafe overlooking the river.", spots: ["Little Buddha", "Freedom Cafe", "German Bakery"] }
+            ],
+            "Varanasi Spiritual": [
+                { title: "Assi Ghat & Evening Aarti", desc: "Experience the world-famous Ganga Aarti at the historic ghats.", spots: ["Assi Ghat", "Dashashwamedh", "Kashi Vishwanath"] },
+                { title: "Sunrise Boat Ride", desc: "Watch the city wake up from a boat on the holy river Ganges.", spots: ["Manikarnika", "Sarnath", "Street Food"] },
+                { title: "Sarnath Circuit", desc: "Visit the place where Buddha gave his first sermon.", spots: ["Dhamekh Stupa", "Archaeological Museum", "Thai Temple"] },
+                { title: "Ramnagar Fort", desc: "Explore the 18th-century fort and museum across the river.", spots: ["Ramnagar Fort", "Museum", "Lassi Shops"] },
+                { title: "Silk Weaving Village", desc: "Witness the creation of world-famous Banarasi silk sarees.", spots: ["Weaving Centers", "Local Bazaar", "Vishwanath Gali"] }
+            ],
+            "Darjeeling Hills": [
+                { title: "Tiger Hill Sunrise", desc: "Watch the sunrise over Kanchenjunga and visit the Batasia Loop.", spots: ["Tiger Hill", "Ghoom Monastery", "Batasia Loop"] },
+                { title: "Tea Gardens & Toy Train", desc: "Enjoy a ride on the UNESCO Toy Train and walk through lush tea estates.", spots: ["Happy Valley", "Mall Road", "Zoo"] },
+                { title: "Himalayan Institute", desc: "Visit the Mountaineering Institute and the Padmaja Naidu Himalayan Zoo.", spots: ["HMI", "Zoo", "Peace Pagoda"] },
+                { title: "Rock Garden & Waterfall", desc: "Explore the terraced gardens and waterfalls at Ganga Maya Park.", spots: ["Rock Garden", "Barbotey Rock", "Nature Walk"] },
+                { title: "Mirik Lake Excursion", desc: "Take a day trip to the beautiful Mirik Lake surrounded by tea gardens.", spots: ["Mirik Lake", "Bokar Monastery", "Orange Orchards"] }
+            ]
+        };
+
+        const DEFAULT_ITINERARY = [
+            { title: "Arrival & Check-in", desc: "Reach your destination and settle into your accommodation.", spots: ["Local Market", "Evening Walk"] },
+            { title: "City Highlights", desc: "Visit the most famous landmarks and monuments in the area.", spots: ["City Center", "Main Square"] },
+            { title: "Nature & Relaxation", desc: "Take a break from the hustle and enjoy local parks or natural spots.", spots: ["Park", "River Side"] },
+            { title: "Departure", desc: "Last-minute souvenir shopping before heading back home.", spots: ["Gift Shop", "Departure Point"] }
+        ];
+
+        const BACKUP_SPOTS = {
+            "Golden Triangle": [
+                { title: "Akshardham Temple", desc: "Visit the stunning Akshardham temple complex for its architecture and light show.", spots: ["Akshardham", "Exhibitions", "Musical Fountain"] },
+                { title: "Jaipur Local Arts", desc: "Spend a day learning traditional block printing or visiting local pottery workshops.", spots: ["Bagru Printing", "Blue Pottery", "Johari Bazaar"] },
+                { title: "Agra's Hidden Forts", desc: "Visit Sikandra or the tomb of Itmad-ud-Daulah for a peaceful afternoon.", spots: ["Sikandra", "Mariam Tomb", "Chini Ka Rauza"] }
+            ],
+            "Himalayan Escape": [
+                { title: "Vashisht Hot Springs", desc: "Relax in the natural sulfur springs and visit the ancient Vashisht temple.", spots: ["Vashisht Temple", "Hot Springs", "Jogini Falls"] },
+                { title: "Naggar Castle Visit", desc: "Explore the historic Naggar Castle and enjoy the local Art Gallery.", spots: ["Naggar Castle", "Roerich Gallery", "Apple Orchards"] }
+            ],
+            "Kerala Backwaters": [
+                { title: "Periyar Wildlife", desc: "Take a boat safari in Periyar Lake to spot wild elephants and unique birds.", spots: ["Periyar Lake", "Elephant Junction", "Spice Plantation"] },
+                { title: "Varkala Cliff", desc: "Relax at the stunning cliffs of Varkala overlooking the Arabian Sea.", spots: ["Varkala Beach", "Janardhana Temple", "Cliff Market"] }
+            ],
+            "Goa Party Week": [
+                { title: "Dudhsagar Falls", desc: "Take a jeep safari to the majestic 'Sea of Milk' waterfalls.", spots: ["Dudhsagar Falls", "Mollem Park", "Spice Farm"] },
+                { title: "Divar Island", desc: "Take a ferry to the quiet Divar Island for a glimpse into Goan village life.", spots: ["Ferry Ride", "Piedade Village", "Old Houses"] }
+            ]
+        };
+
+        function renderItinerary() {
+            const tripData = JSON.parse(localStorage.getItem("selectedTrip"));
+            const container = document.getElementById('itineraryContainer');
+            const tripNameHeader = document.getElementById('exploreTripName');
+            
+            if (!tripData || !container) return;
+            
+            const tripName = tripData.name || tripData.tripName || "Journey";
+            tripNameHeader.textContent = tripName;
+            
+            let totalDays = 0;
+            if (tripData.date && tripData.endDate) {
+                const s = new Date(tripData.date + 'T00:00:00');
+                const e = new Date(tripData.endDate + 'T00:00:00');
+                totalDays = Math.round((e - s) / 86400000) + 1;
+            }
+            if (totalDays <= 0) totalDays = 4;
+            if (totalDays > 30) totalDays = 30;
+
+            const baseItinerary = ITINERARIES[tripName] || DEFAULT_ITINERARY;
+            const backup = BACKUP_SPOTS[tripName] || [];
+            
+            let finalItinerary = [];
+            for (let i = 0; i < totalDays; i++) {
+                if (i < baseItinerary.length) {
+                    finalItinerary.push(baseItinerary[i]);
+                } else {
+                    const backupIdx = i - baseItinerary.length;
+                    if (backupIdx < backup.length) {
+                        finalItinerary.push(backup[backupIdx]);
+                    } else if (i === totalDays - 1) {
+                        finalItinerary.push({ 
+                            title: "Grand Finale & Departure", 
+                            desc: "Last day to soak in the vibes. Relax at a local cafe and prepare for your journey back home.", 
+                            spots: ["Local Souvenir Shop", "Airport/Station"] 
+                        });
+                    } else {
+                        finalItinerary.push({ 
+                            title: "Plan with TripMate AI", 
+                            desc: "Discover more personalized places and hidden gems! You can take suggestions from our AI Chatbot.", 
+                            spots: ["<a href='Chatbot.html?from=view' style='color:inherit;text-decoration:none'>Ask AI Chatbot →</a>"] 
+                        });
+                    }
+                }
+            }
+            
+            container.innerHTML = finalItinerary.map((day, idx) => `
+                <div class="itinerary-day" style="animation-delay: ${idx * 0.1}s">
+                    <div class="day-header">
+                        <div class="day-num">DAY ${idx + 1}</div>
+                        <div class="day-title">${day.title}</div>
+                    </div>
+                    <div class="day-content">${day.desc}</div>
+                    <div class="day-spots">
+                        ${day.spots.map(spot => `<span class="spot-tag">${spot}</span>`).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Final call
+        loadTripDetails();
+    </script>
+</body>
+
+</html>
