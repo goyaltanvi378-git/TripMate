@@ -1,0 +1,2202 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>TripMate — Create Trip</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Outfit:wght@300;400;500;600&display=swap"
+    rel="stylesheet" />
+  <Style>
+    :root {
+      --spring: cubic-bezier(.25, 1.5, .5, 1);
+      --ease: ease;
+    }
+
+    .success-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .3s ease;
+      z-index: 100;
+    }
+
+    .overlay {
+      pointer-events: none;
+    }
+
+    /* ══════════════════════════════════════════
+   TRIPMATE — CREATE TRIP PAGE
+   Theme: Luminous Dusk · Glassmorphism
+══════════════════════════════════════════ */
+
+    :root {
+      --sky-top: #04091a;
+      --sky-mid: #0d1f4e;
+      --sky-dusk: #a04010;
+      --sky-amber: #f0a34a;
+      --sky-peach: #ffd090;
+      --gold: #f5a623;
+      --gold-light: #f5c96a;
+      --gold-dark: #b8621a;
+      --teal: #38c7b8;
+      --glass: rgba(255, 255, 255, 0.07);
+      --glass-b: rgba(255, 255, 255, 0.16);
+      --text-primary: rgba(255, 248, 235, 0.95);
+      --text-muted: rgba(220, 200, 165, 0.60);
+      --input-bg: rgba(255, 255, 255, 0.06);
+      --input-bdr: rgba(255, 255, 255, 0.14);
+      --error: #ff6b6b;
+      --success: #38c7b8;
+      --ease: cubic-bezier(0.4, 0, 0.2, 1);
+      --spring: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: 'Outfit', sans-serif;
+      -webkit-font-smoothing: antialiased
+    }
+
+    /* ══ SCENE ══ */
+    #scene {
+      position: fixed;
+      inset: 0;
+      overflow: hidden;
+      background: linear-gradient(175deg,
+          var(--sky-top) 0%,
+          #0b1a44 25%,
+          #153070 48%,
+          var(--sky-dusk) 70%,
+          var(--sky-amber) 84%,
+          var(--sky-peach) 100%);
+    }
+
+    /* ── Stars ── */
+    #starCanvas {
+      position: absolute;
+      inset: 0;
+      z-index: 0
+    }
+
+    /* ── Floating orbs (extra depth) ── */
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(60px);
+      pointer-events: none;
+      z-index: 0;
+      animation: orb-drift var(--dur, 14s) ease-in-out infinite;
+    }
+
+    .orb1 {
+      width: 280px;
+      height: 280px;
+      background: rgba(245, 166, 35, 0.08);
+      top: 10%;
+      left: 5%;
+      --dur: 16s
+    }
+
+    .orb2 {
+      width: 200px;
+      height: 200px;
+      background: rgba(56, 199, 184, 0.06);
+      top: 30%;
+      right: 8%;
+      --dur: 20s;
+      animation-delay: -7s
+    }
+
+    .orb3 {
+      width: 340px;
+      height: 340px;
+      background: rgba(245, 100, 30, 0.06);
+      bottom: 20%;
+      left: 50%;
+      --dur: 18s;
+      animation-delay: -4s
+    }
+
+    @keyframes orb-drift {
+
+      0%,
+      100% {
+        transform: translateY(0) scale(1)
+      }
+
+      50% {
+        transform: translateY(-28px) scale(1.08)
+      }
+    }
+
+    /* ── Sun ── */
+    .sun {
+      position: absolute;
+      bottom: 30%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 82px;
+      height: 82px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #ffe9a0 0%, #f5a623 42%, rgba(240, 120, 30, 0) 72%);
+      box-shadow: 0 0 72px 40px rgba(245, 166, 35, 0.25), 0 0 150px 75px rgba(240, 100, 10, 0.10);
+      animation: sun-pulse 8s ease-in-out infinite;
+      z-index: 1
+    }
+
+    @keyframes sun-pulse {
+
+      0%,
+      100% {
+        transform: translateX(-50%) scale(1)
+      }
+
+      50% {
+        transform: translateX(-50%) scale(1.09)
+      }
+    }
+
+    /* ── Rays ── */
+    .rays {
+      position: absolute;
+      bottom: 30%;
+      left: 50%;
+      width: 360px;
+      height: 360px;
+      margin-left: -180px;
+      margin-bottom: -180px;
+      z-index: 0;
+      opacity: 0.07;
+      animation: spin-rays 65s linear infinite
+    }
+
+    .ray {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 180px;
+      height: 2px;
+      background: linear-gradient(90deg, rgba(255, 220, 100, 0.9), transparent);
+      transform-origin: left center
+    }
+
+    @keyframes spin-rays {
+      from {
+        transform: rotate(0deg)
+      }
+
+      to {
+        transform: rotate(360deg)
+      }
+    }
+
+    /* ── Clouds ── */
+    .cloud-track {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 250%;
+      height: 100%;
+      z-index: 2;
+      pointer-events: none
+    }
+
+    .ct1 {
+      animation: drift 90s linear infinite
+    }
+
+    .ct2 {
+      animation: drift 128s linear infinite;
+      animation-delay: -42s
+    }
+
+    .ct3 {
+      animation: drift 72s linear infinite;
+      animation-delay: -16s;
+      opacity: .5
+    }
+
+    @keyframes drift {
+      from {
+        transform: translateX(0)
+      }
+
+      to {
+        transform: translateX(-50%)
+      }
+    }
+
+    .cloud {
+      position: absolute;
+      border-radius: 60px;
+      background: rgba(255, 255, 255, 0.78);
+      filter: blur(3px)
+    }
+
+    .cloud::before,
+    .cloud::after {
+      content: '';
+      position: absolute;
+      background: inherit;
+      border-radius: 50%
+    }
+
+    .cl-a {
+      width: 250px;
+      height: 60px;
+      top: 10%;
+      left: 5%
+    }
+
+    .cl-a::before {
+      width: 105px;
+      height: 105px;
+      top: -54px;
+      left: 38px
+    }
+
+    .cl-a::after {
+      width: 82px;
+      height: 82px;
+      top: -42px;
+      left: 108px
+    }
+
+    .cl-b {
+      width: 190px;
+      height: 48px;
+      top: 20%;
+      left: 47%;
+      opacity: .7
+    }
+
+    .cl-b::before {
+      width: 76px;
+      height: 76px;
+      top: -40px;
+      left: 26px
+    }
+
+    .cl-b::after {
+      width: 60px;
+      height: 60px;
+      top: -30px;
+      left: 76px
+    }
+
+    .cl-c {
+      width: 290px;
+      height: 68px;
+      top: 7%;
+      left: 74%;
+      opacity: .62
+    }
+
+    .cl-c::before {
+      width: 112px;
+      height: 112px;
+      top: -58px;
+      left: 48px
+    }
+
+    .cl-c::after {
+      width: 88px;
+      height: 88px;
+      top: -46px;
+      left: 128px
+    }
+
+    .cl-d {
+      width: 175px;
+      height: 43px;
+      top: 27%;
+      left: 20%;
+      opacity: .48
+    }
+
+    .cl-d::before {
+      width: 68px;
+      height: 68px;
+      top: -35px;
+      left: 21px
+    }
+
+    .cl-d::after {
+      width: 53px;
+      height: 53px;
+      top: -27px;
+      left: 66px
+    }
+
+    .cl-e {
+      width: 230px;
+      height: 54px;
+      top: 14%;
+      left: 34%;
+      opacity: .58
+    }
+
+    .cl-e::before {
+      width: 92px;
+      height: 92px;
+      top: -48px;
+      left: 34px
+    }
+
+    .cl-e::after {
+      width: 72px;
+      height: 72px;
+      top: -36px;
+      left: 99px
+    }
+
+    .cl-f {
+      width: 155px;
+      height: 38px;
+      top: 32%;
+      left: 60%;
+      opacity: .38;
+      filter: blur(5px)
+    }
+
+    .cl-g {
+      width: 205px;
+      height: 50px;
+      top: 8%;
+      left: 17%;
+      opacity: .48;
+      filter: blur(3px)
+    }
+
+    /* ── Mountains ── */
+    .mtns {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 50%;
+      z-index: 3
+    }
+
+    .mtns svg {
+      width: 100%;
+      height: 100%;
+      display: block
+    }
+
+    /* ── Trees ── */
+    .trees {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 20%;
+      z-index: 4;
+      pointer-events: none
+    }
+
+    .trees svg {
+      width: 100%;
+      height: 100%;
+      display: block
+    }
+
+    /* ── Ground ── */
+    .ground {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 8%;
+      background: linear-gradient(180deg, #0a1a0a 0%, #050d05 100%);
+      z-index: 5
+    }
+
+    .ground::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 70%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(245, 166, 35, 0.30), transparent)
+    }
+
+    /* ── Airplane ── */
+    .plane-wrap {
+      position: absolute;
+      top: 13%;
+      left: -180px;
+      z-index: 6;
+      animation: fly 30s cubic-bezier(0.25, 0, 0.75, 1) infinite
+    }
+
+    .plane-svg {
+      width: 148px;
+      height: auto;
+      filter: drop-shadow(0 6px 22px rgba(200, 230, 255, 0.45));
+      transform: rotate(-5deg)
+    }
+
+    @keyframes fly {
+      0% {
+        left: -180px;
+        top: 15%;
+        opacity: 0
+      }
+
+      4% {
+        opacity: 1
+      }
+
+      40% {
+        top: 11%
+      }
+
+      65% {
+        top: 13%
+      }
+
+      96% {
+        opacity: 1
+      }
+
+      100% {
+        left: 110%;
+        top: 9%;
+        opacity: 0
+      }
+    }
+
+    /* ── Overlay ── */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 7;
+      pointer-events: none;
+      background: linear-gradient(162deg, rgba(2, 7, 22, 0.54) 0%, rgba(10, 20, 55, 0.28) 52%, rgba(0, 0, 0, 0.56) 100%)
+    }
+
+    /* ══ STAGE ══ */
+    .stage {
+      position: fixed;
+      inset: 0;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      overflow-y: auto;
+    }
+
+    /* ══ CARD ══ */
+    .card {
+      position: relative;
+      width: 100%;
+      max-width: 520px;
+      padding: 44px 46px 40px;
+      background: var(--glass);
+      border: 1px solid var(--glass-b);
+      border-radius: 30px;
+      backdrop-filter: blur(34px) saturate(1.8) brightness(1.06);
+      -webkit-backdrop-filter: blur(34px) saturate(1.8) brightness(1.06);
+      box-shadow:
+        0 16px 70px rgba(0, 0, 0, 0.52),
+        0 2px 0 rgba(255, 255, 255, 0.13) inset,
+        0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+      animation: card-rise 1s var(--spring) both;
+      /* allow internal scroll on small screens */
+      max-height: calc(100vh - 32px);
+      overflow-y: auto;
+      scrollbar-width: none;
+    }
+
+    .card::-webkit-scrollbar {
+      display: none
+    }
+
+    @keyframes card-rise {
+      from {
+        opacity: 0;
+        transform: translateY(44px) scale(0.96)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1)
+      }
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 18%;
+      right: 18%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(245, 166, 35, 0.78), transparent);
+      border-radius: 999px
+    }
+
+    .card::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 28%;
+      right: 28%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(56, 199, 184, 0.42), transparent)
+    }
+
+    /* ── Back link ── */
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 400;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      text-decoration: none;
+      margin-bottom: 24px;
+      transition: color .25s var(--ease), gap .25s var(--ease);
+      animation: fade-up .7s .08s both
+    }
+
+    .back-link:hover {
+      color: rgba(245, 210, 130, 0.85);
+      gap: 9px
+    }
+
+    .back-link svg {
+      width: 14px;
+      height: 14px
+    }
+
+    /* ── Header ── */
+    .card-header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 28px;
+      animation: fade-up .7s .12s both
+    }
+
+    @keyframes fade-up {
+      from {
+        opacity: 0;
+        transform: translateY(14px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0)
+      }
+    }
+
+    .header-icon {
+      font-size: 46px;
+      line-height: 1;
+      margin-bottom: 11px;
+      animation: icon-float 5s ease-in-out infinite;
+      filter: drop-shadow(0 5px 20px rgba(245, 166, 35, 0.52))
+    }
+
+    @keyframes icon-float {
+
+      0%,
+      100% {
+        transform: translateY(0) scale(1)
+      }
+
+      50% {
+        transform: translateY(-9px) scale(1.06)
+      }
+    }
+
+    .card-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.6rem, 5vw, 2.1rem);
+      font-weight: 900;
+      letter-spacing: .01em;
+      text-align: center;
+      line-height: 1.1;
+      background: linear-gradient(135deg, #fff 22%, #f5c96a 60%, #f5a623 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 5px
+    }
+
+    .card-sub {
+      font-size: 11px;
+      font-weight: 300;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--text-muted)
+    }
+
+    /* ── Progress strip ── */
+    .progress-strip {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      width: 100%;
+      margin-bottom: 28px;
+      animation: fade-up .7s .16s both
+    }
+
+    .step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      flex: 1;
+      position: relative;
+    }
+
+    .step:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      top: 13px;
+      left: calc(50% + 18px);
+      width: calc(100% - 36px);
+      height: 1px;
+      background: rgba(255, 255, 255, 0.12)
+    }
+
+    .step.done:not(:last-child)::after {
+      background: rgba(245, 166, 35, 0.4)
+    }
+
+    .step-dot {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 600;
+      font-family: 'Outfit', sans-serif;
+      border: 1.5px solid rgba(255, 255, 255, 0.18);
+      background: rgba(255, 255, 255, 0.06);
+      color: rgba(200, 180, 145, 0.5);
+      transition: all .4s var(--ease);
+      z-index: 1;
+      position: relative
+    }
+
+    .step.active .step-dot {
+      background: linear-gradient(135deg, #b8621a, #f5a623);
+      border-color: transparent;
+      color: #1a0900;
+      box-shadow: 0 2px 14px rgba(245, 166, 35, 0.42)
+    }
+
+    .step.done .step-dot {
+      background: rgba(56, 199, 184, 0.18);
+      border-color: rgba(56, 199, 184, 0.45);
+      color: var(--teal)
+    }
+
+    .step-lbl {
+      font-size: 9px;
+      font-weight: 400;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: rgba(200, 180, 145, 0.38);
+    }
+
+    .step.active .step-lbl {
+      color: rgba(245, 210, 130, 0.75)
+    }
+
+    .step.done .step-lbl {
+      color: rgba(56, 199, 184, 0.6)
+    }
+
+    /* ── Divider ── */
+    .div-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 24px;
+      animation: fade-up .7s .20s both
+    }
+
+    .div-line {
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(245, 166, 35, 0.26), transparent)
+    }
+
+    .div-ico {
+      color: rgba(245, 166, 35, 0.44);
+      font-size: 9px;
+      letter-spacing: .1em;
+      white-space: nowrap
+    }
+
+    /* ══ FORM ══ */
+    .form {
+      display: flex;
+      flex-direction: column;
+      gap: 14px
+    }
+
+    /* ── Two-column grid for date+budget ── */
+    .field-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px
+    }
+
+    /* ── Field ── */
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      animation: fade-up .7s both
+    }
+
+    .field:nth-child(1) {
+      animation-delay: .24s
+    }
+
+    .field:nth-child(2) {
+      animation-delay: .30s
+    }
+
+    .field:nth-child(3) {
+      animation-delay: .36s
+    }
+
+    .field-row:nth-child(3) .field:nth-child(1) {
+      animation-delay: .42s
+    }
+
+    .field-row:nth-child(3) .field:nth-child(2) {
+      animation-delay: .48s
+    }
+
+    .field:nth-child(4) {
+      animation-delay: .54s
+    }
+
+    .field-label {
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: rgba(220, 195, 145, 0.62);
+      padding-left: 4px;
+      display: flex;
+      align-items: center;
+      gap: 5px
+    }
+
+    .label-required {
+      color: rgba(245, 166, 35, 0.6);
+      font-size: 10px
+    }
+
+    /* ── Input wrap ── */
+    .input-wrap {
+      position: relative;
+      display: flex;
+      align-items: center
+    }
+
+    .input-icon {
+      position: absolute;
+      left: 14px;
+      width: 16px;
+      height: 16px;
+      color: rgba(245, 166, 35, 0.48);
+      pointer-events: none;
+      transition: color .3s var(--ease);
+      z-index: 1;
+      flex-shrink: 0
+    }
+
+    .input-wrap:focus-within .input-icon {
+      color: rgba(245, 166, 35, 0.9)
+    }
+
+    .input {
+      width: 100%;
+      padding: 14px 14px 14px 42px;
+      background: var(--input-bg);
+      border: 1px solid var(--input-bdr);
+      border-radius: 13px;
+      color: var(--text-primary);
+      font-family: 'Outfit', sans-serif;
+      font-size: 13.5px;
+      font-weight: 400;
+      outline: none;
+      transition: border-color .3s var(--ease), box-shadow .3s var(--ease), background .3s;
+      caret-color: var(--gold)
+    }
+
+    .input::placeholder {
+      color: rgba(200, 180, 145, 0.36);
+      font-weight: 300;
+      letter-spacing: .04em
+    }
+
+    .input:focus {
+      border-color: rgba(245, 166, 35, 0.55);
+      background: rgba(255, 255, 255, 0.09);
+      box-shadow: 0 0 0 3px rgba(245, 166, 35, 0.13), 0 4px 18px rgba(245, 166, 35, 0.09)
+    }
+
+    .input.error {
+      border-color: rgba(255, 107, 107, 0.58);
+      box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.11)
+    }
+
+    .input.valid {
+      border-color: rgba(56, 199, 184, 0.48);
+      box-shadow: 0 0 0 3px rgba(56, 199, 184, 0.10)
+    }
+
+    /* date/select arrow colour fix */
+    .input[type=date]::-webkit-calendar-picker-indicator {
+      filter: invert(1) opacity(0.4);
+      cursor: pointer
+    }
+
+    .input[type=date] {
+      color-scheme: dark
+    }
+
+    /* select styling */
+    select.input {
+      appearance: none;
+      -webkit-appearance: none;
+      cursor: pointer;
+      padding-right: 36px
+    }
+
+    .select-arrow {
+      position: absolute;
+      right: 14px;
+      pointer-events: none;
+      color: rgba(245, 166, 35, 0.5);
+      transition: transform .3s var(--ease), color .3s
+    }
+
+    .select-arrow svg {
+      width: 14px;
+      height: 14px
+    }
+
+    .input-wrap:focus-within .select-arrow {
+      color: rgba(245, 166, 35, 0.85);
+      transform: rotate(180deg)
+    }
+
+    select.input option {
+      background: #0d1f4e;
+      color: rgba(255, 248, 235, 0.95)
+    }
+
+    /* number input arrows */
+    .input[type=number]::-webkit-inner-spin-button,
+    .input[type=number]::-webkit-outer-spin-button {
+      opacity: 0
+    }
+
+    /* suffix badge inside input */
+    .input-suffix {
+      position: absolute;
+      right: 13px;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: .08em;
+      color: rgba(200, 175, 120, 0.55);
+      pointer-events: none;
+      z-index: 1
+    }
+
+    /* ── Field message ── */
+    .field-msg {
+      font-size: 10px;
+      font-weight: 400;
+      letter-spacing: .06em;
+      min-height: 13px;
+      padding-left: 4px;
+      opacity: 0;
+      transform: translateY(-4px);
+      transition: opacity .25s, transform .25s
+    }
+
+    .field-msg.show {
+      opacity: 1;
+      transform: translateY(0)
+    }
+
+    .field-msg.err {
+      color: var(--error)
+    }
+
+    .field-msg.ok {
+      color: var(--success)
+    }
+
+    /* ── Category chips ── */
+    .chips-label {
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: rgba(220, 195, 145, 0.62);
+      padding-left: 4px;
+      margin-bottom: 1px;
+      animation: fade-up .7s .60s both
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      animation: fade-up .7s .64s both
+    }
+
+    .chip {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      border-radius: 50px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      background: rgba(255, 255, 255, 0.05);
+      color: rgba(210, 190, 155, 0.65);
+      font-family: 'Outfit', sans-serif;
+      font-size: 11.5px;
+      font-weight: 400;
+      letter-spacing: .04em;
+      cursor: pointer;
+      outline: none;
+      transition: all .28s var(--ease);
+      -webkit-tap-highlight-color: transparent
+    }
+
+    .chip svg {
+      width: 13px;
+      height: 13px;
+      opacity: .7;
+      flex-shrink: 0
+    }
+
+    .chip:hover {
+      background: rgba(255, 255, 255, 0.10);
+      border-color: rgba(255, 255, 255, 0.22);
+      color: rgba(235, 215, 175, 0.9)
+    }
+
+    .chip.selected {
+      background: linear-gradient(135deg, rgba(184, 98, 26, 0.28), rgba(245, 166, 35, 0.20));
+      border-color: rgba(245, 166, 35, 0.45);
+      color: rgba(245, 200, 120, 0.95);
+      box-shadow: 0 2px 12px rgba(245, 166, 35, 0.18)
+    }
+
+    .chip.selected svg {
+      opacity: 1
+    }
+
+    /* ── Travelers row ── */
+    .travelers-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      background: var(--input-bg);
+      border: 1px solid var(--input-bdr);
+      border-radius: 13px;
+      overflow: hidden;
+      transition: border-color .3s, box-shadow .3s;
+      animation: fade-up .7s .68s both
+    }
+
+    .travelers-wrap:focus-within {
+      border-color: rgba(245, 166, 35, 0.55);
+      box-shadow: 0 0 0 3px rgba(245, 166, 35, 0.13)
+    }
+
+    .trav-icon {
+      padding: 0 0 0 14px;
+      color: rgba(245, 166, 35, 0.48);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center
+    }
+
+    .trav-icon svg {
+      width: 16px;
+      height: 16px
+    }
+
+    .trav-label {
+      flex: 1;
+      padding: 14px 10px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 13.5px;
+      font-weight: 300;
+      color: rgba(200, 180, 145, 0.5);
+      letter-spacing: .04em;
+      user-select: none
+    }
+
+    .trav-label.has-value {
+      color: var(--text-primary)
+    }
+
+    .trav-controls {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      padding-right: 6px
+    }
+
+    .trav-btn {
+      width: 30px;
+      height: 30px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.06);
+      color: rgba(220, 195, 145, 0.7);
+      font-size: 16px;
+      font-weight: 400;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 2px;
+      transition: background .25s, border-color .25s, color .25s, transform .18s;
+      outline: none
+    }
+
+    .trav-btn:hover {
+      background: rgba(245, 166, 35, 0.18);
+      border-color: rgba(245, 166, 35, 0.38);
+      color: rgba(245, 200, 120, 0.95)
+    }
+
+    .trav-btn:active {
+      transform: scale(0.91)
+    }
+
+    .trav-count {
+      min-width: 28px;
+      text-align: center;
+      font-family: 'Outfit', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-primary)
+    }
+
+    /* ── Notes textarea ── */
+    .textarea {
+      width: 100%;
+      padding: 13px 14px 13px 42px;
+      background: var(--input-bg);
+      border: 1px solid var(--input-bdr);
+      border-radius: 13px;
+      color: var(--text-primary);
+      font-family: 'Outfit', sans-serif;
+      font-size: 13.5px;
+      font-weight: 400;
+      outline: none;
+      resize: none;
+      transition: border-color .3s var(--ease), box-shadow .3s var(--ease), background .3s;
+      caret-color: var(--gold)
+    }
+
+    .textarea::placeholder {
+      color: rgba(200, 180, 145, 0.36);
+      font-weight: 300
+    }
+
+    .textarea:focus {
+      border-color: rgba(245, 166, 35, 0.55);
+      background: rgba(255, 255, 255, 0.09);
+      box-shadow: 0 0 0 3px rgba(245, 166, 35, 0.13)
+    }
+
+    /* ── Char counter ── */
+    .char-count {
+      font-size: 10px;
+      letter-spacing: .06em;
+      color: rgba(200, 175, 130, 0.38);
+      text-align: right;
+      padding-right: 4px;
+      margin-top: -10px;
+      animation: fade-up .7s .76s both
+    }
+
+    /* ══ SUBMIT BUTTON ══ */
+    .btn-submit {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      padding: 16px 24px;
+      border: none;
+      border-radius: 16px;
+      cursor: pointer;
+      background: linear-gradient(135deg, #b8621a 0%, #d98228 40%, #f5a623 78%, #f5c96a 100%);
+      color: #1a0900;
+      font-family: 'Outfit', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: .06em;
+      overflow: hidden;
+      outline: none;
+      box-shadow: 0 6px 34px rgba(245, 166, 35, 0.42), 0 2px 10px rgba(0, 0, 0, 0.3);
+      transition: transform .3s var(--ease), box-shadow .3s var(--ease);
+      animation: fade-up .7s .82s both;
+      -webkit-tap-highlight-color: transparent
+    }
+
+    .btn-submit:hover:not(:disabled) {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 48px rgba(245, 166, 35, 0.56), 0 4px 18px rgba(0, 0, 0, 0.35)
+    }
+
+    .btn-submit:active:not(:disabled) {
+      transform: scale(0.97)
+    }
+
+    .btn-submit:disabled {
+      opacity: .6;
+      cursor: not-allowed
+    }
+
+    .btn-submit::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(105deg, transparent 38%, rgba(255, 255, 255, 0.22) 50%, transparent 62%);
+      opacity: 0;
+      transition: opacity .4s
+    }
+
+    .btn-submit:hover::before {
+      opacity: 1;
+      animation: shine-sweep .5s ease forwards
+    }
+
+    @keyframes shine-sweep {
+      from {
+        background-position: -200% 0
+      }
+
+      to {
+        background-position: 200% 0
+      }
+    }
+
+    .btn-icon {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+      transition: transform .35s var(--ease)
+    }
+
+    .btn-submit:hover .btn-icon {
+      transform: translateX(4px) rotate(10deg)
+    }
+
+    .btn-text {
+      position: relative;
+      z-index: 1
+    }
+
+    /* Spinner */
+    .btn-spinner {
+      display: none;
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(26, 9, 0, 0.3);
+      border-top-color: #1a0900;
+      border-radius: 50%;
+      animation: spin .7s linear infinite
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg)
+      }
+    }
+
+    .btn-submit.loading .btn-icon,
+    .btn-submit.loading .btn-text {
+      display: none
+    }
+
+    .btn-submit.loading .btn-spinner {
+      display: block
+    }
+
+    /* ── Footer note ── */
+    .card-foot {
+      text-align: center;
+      margin-top: 18px;
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-size: 10px;
+      letter-spacing: .18em;
+      color: rgba(185, 165, 125, 0.36);
+      animation: fade-up .7s .88s both
+    }
+
+    /* ══ SUCCESS OVERLAY ══ */
+    .success-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(4, 9, 26, 0.82);
+      backdrop-filter: blur(16px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .5s var(--ease)
+    }
+
+    .success-overlay.show {
+      opacity: 1;
+      pointer-events: all
+    }
+
+    .success-card {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(56, 199, 184, 0.35);
+      border-radius: 28px;
+      padding: 48px 52px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      box-shadow: 0 16px 64px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(56, 199, 184, 0.1) inset;
+      transform: scale(0.88);
+      transition: transform .5s var(--spring);
+      text-align: center;
+      max-width: 360px
+    }
+
+    .success-overlay.show .success-card {
+      transform: scale(1)
+    }
+
+    .success-icon {
+      font-size: 58px;
+      line-height: 1;
+      animation: success-bounce 1s var(--spring) both
+    }
+
+    @keyframes success-bounce {
+      0% {
+        transform: scale(0.4);
+        opacity: 0
+      }
+
+      70% {
+        transform: scale(1.15)
+      }
+
+      100% {
+        transform: scale(1);
+        opacity: 1
+      }
+    }
+
+    .success-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.7rem;
+      font-weight: 900;
+      background: linear-gradient(135deg, #38c7b8, #f5c96a);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text
+    }
+
+    .success-sub {
+      font-size: 13px;
+      font-weight: 300;
+      letter-spacing: .06em;
+      color: rgba(200, 185, 155, 0.7);
+      line-height: 1.6
+    }
+
+    .success-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 20px;
+      border-radius: 50px;
+      background: rgba(56, 199, 184, 0.12);
+      border: 1px solid rgba(56, 199, 184, 0.3);
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: .1em;
+      color: rgba(100, 230, 210, 0.9);
+      text-transform: uppercase
+    }
+
+    .success-badge-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #38c7b8;
+      box-shadow: 0 0 8px #38c7b8
+    }
+
+    .btn-success-close {
+      margin-top: 4px;
+      padding: 13px 36px;
+      border: none;
+      border-radius: 14px;
+      cursor: pointer;
+      background: linear-gradient(135deg, #38c7b8, #2aa89e);
+      color: white;
+      font-family: 'Outfit', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: .06em;
+      box-shadow: 0 4px 20px rgba(56, 199, 184, 0.4);
+      transition: transform .28s var(--ease), box-shadow .28s var(--ease)
+    }
+
+    .btn-success-close:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(56, 199, 184, 0.52)
+    }
+
+    /* ══ TOAST ══ */
+    .toast {
+      position: fixed;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%) translateY(14px);
+      background: rgba(10, 18, 48, 0.88);
+      border: 1px solid rgba(245, 166, 35, 0.28);
+      backdrop-filter: blur(22px);
+      color: rgba(245, 210, 130, 0.96);
+      font-family: 'Outfit', sans-serif;
+      font-size: 13px;
+      font-weight: 400;
+      letter-spacing: .04em;
+      padding: 12px 28px;
+      border-radius: 50px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .35s, transform .35s var(--ease);
+      white-space: nowrap;
+      z-index: 99;
+      box-shadow: 0 4px 28px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(245, 166, 35, 0.1) inset
+    }
+
+    .toast.on {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0)
+    }
+
+    .toast.success {
+      border-color: rgba(56, 199, 184, 0.4);
+      color: rgba(100, 230, 210, 0.96)
+    }
+
+    /* ══ RESPONSIVE ══ */
+    @media(max-width:520px) {
+      .card {
+        padding: 32px 22px 28px;
+        border-radius: 24px
+      }
+
+      .field-row {
+        grid-template-columns: 1fr
+      }
+
+      .chips {
+        gap: 6px
+      }
+
+      .chip {
+        font-size: 11px;
+        padding: 7px 12px
+      }
+    }
+
+    @media(max-height:700px) {
+      .card {
+        padding: 26px 38px 24px
+      }
+
+      .card-header {
+        margin-bottom: 16px
+      }
+
+      .header-icon {
+        font-size: 36px;
+        margin-bottom: 8px
+      }
+
+      .progress-strip {
+        margin-bottom: 18px
+      }
+
+      .div-row {
+        margin-bottom: 16px
+      }
+
+      .form {
+        gap: 10px
+      }
+    }
+
+    /* ══ AI CHATBOX BUTTON ══ */
+    .ai-chat-btn {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      z-index: 90;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 24px;
+      background: linear-gradient(135deg, #b8621a 0%, #d98228 40%, #f5a623 78%, #f5c96a 100%);
+      color: #1a0900;
+      text-decoration: none;
+      border-radius: 50px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: .04em;
+      box-shadow: 0 6px 24px rgba(245, 166, 35, 0.42), 0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+      transition: transform .3s var(--ease), box-shadow .3s var(--ease);
+      animation: fade-up .7s 1s both;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .ai-chat-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 36px rgba(245, 166, 35, 0.56), 0 0 0 1px rgba(255, 255, 255, 0.3) inset;
+    }
+
+    .ai-chat-btn:active {
+      transform: scale(0.96);
+    }
+
+    .ai-chat-icon {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+      transition: transform .35s var(--ease);
+    }
+
+    .ai-chat-btn:hover .ai-chat-icon {
+      transform: rotate(-10deg) scale(1.1);
+    }
+
+    @media(max-width:768px) {
+      .ai-chat-btn {
+        bottom: 20px;
+        right: 20px;
+        padding: 12px 20px;
+        font-size: 14px;
+      }
+    }
+  </Style>
+</head>
+
+<body>
+
+  <!-- ══ SCENE ══ -->
+  <div id="scene">
+    <canvas id="starCanvas"></canvas>
+
+    <!-- Depth orbs -->
+    <div class="orb orb1"></div>
+    <div class="orb orb2"></div>
+    <div class="orb orb3"></div>
+
+    <div class="sun"></div>
+    <div class="rays" id="rays"></div>
+
+    <!-- Clouds -->
+    <div class="cloud-track ct1">
+      <div class="cloud cl-a"></div>
+      <div class="cloud cl-b"></div>
+      <div class="cloud cl-c"></div>
+      <div class="cloud cl-f"></div>
+      <div class="cloud cl-a" style="left:52%"></div>
+      <div class="cloud cl-b" style="left:96%"></div>
+      <div class="cloud cl-c" style="left:123%"></div>
+    </div>
+    <div class="cloud-track ct2">
+      <div class="cloud cl-d"></div>
+      <div class="cloud cl-e"></div>
+      <div class="cloud cl-g"></div>
+      <div class="cloud cl-d" style="left:70%"></div>
+      <div class="cloud cl-e" style="left:105%"></div>
+    </div>
+    <div class="cloud-track ct3">
+      <div class="cloud cl-f"></div>
+      <div class="cloud cl-b" style="left:35%;top:30%"></div>
+      <div class="cloud cl-f" style="left:85%"></div>
+    </div>
+
+    <!-- Mountains -->
+    <div class="mtns">
+      <svg viewBox="0 0 1440 380" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="mFar" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#1c3066" stop-opacity=".72" />
+            <stop offset="100%" stop-color="#080e22" />
+          </linearGradient>
+          <linearGradient id="mMid" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#122050" stop-opacity=".88" />
+            <stop offset="100%" stop-color="#060c18" />
+          </linearGradient>
+          <linearGradient id="mNear" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#0c1830" />
+            <stop offset="100%" stop-color="#030810" />
+          </linearGradient>
+          <linearGradient id="snow" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="rgba(255,255,255,0.50)" />
+            <stop offset="100%" stop-color="rgba(255,255,255,0)" />
+          </linearGradient>
+        </defs>
+        <polygon fill="url(#mFar)"
+          points="0,240 80,138 165,192 268,98 375,162 485,78 604,157 724,63 844,147 965,73 1083,157 1204,83 1325,152 1440,98 1440,380 0,380" />
+        <polygon fill="url(#snow)" opacity=".65" points="268,98 248,130 288,130" />
+        <polygon fill="url(#snow)" opacity=".55" points="485,78 463,116 507,116" />
+        <polygon fill="url(#snow)" opacity=".65" points="724,63 702,98 746,98" />
+        <polygon fill="url(#snow)" opacity=".55" points="965,73 944,108 986,108" />
+        <polygon fill="url(#snow)" opacity=".50" points="1204,83 1183,118 1225,118" />
+        <polygon fill="url(#mMid)"
+          points="0,278 72,208 152,248 243,183 342,228 452,163 572,223 682,153 803,218 922,158 1042,218 1163,163 1282,218 1382,178 1440,204 1440,380 0,380" />
+        <polygon fill="url(#mNear)"
+          points="0,318 62,268 142,293 242,248 362,288 482,238 602,278 722,243 842,276 962,243 1082,278 1202,246 1332,273 1440,250 1440,380 0,380" />
+      </svg>
+    </div>
+
+    <!-- Trees -->
+    <div class="trees">
+      <svg viewBox="0 0 1440 160" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="tG" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#0a1f0a" />
+            <stop offset="100%" stop-color="#020602" />
+          </linearGradient>
+        </defs>
+        <g fill="url(#tG)">
+          <polygon points="0,160 17,90 34,160" />
+          <polygon points="14,160 32,76 50,160" />
+          <polygon points="30,160 47,86 64,160" />
+          <polygon points="44,160 60,96 76,160" />
+          <polygon points="58,160 74,82 90,160" />
+          <polygon points="73,160 90,93 107,160" />
+          <polygon points="88,160 105,84 122,160" />
+          <polygon points="102,160 118,95 134,160" />
+          <polygon points="148,160 165,80 182,160" />
+          <polygon points="162,160 180,88 198,160" />
+          <polygon points="178,160 194,82 210,160" />
+          <polygon points="192,160 208,90 224,160" />
+          <polygon points="210,160 227,85 244,160" />
+          <polygon points="227,160 243,97 259,160" />
+          <polygon points="1050,160 1067,84 1084,160" />
+          <polygon points="1065,160 1083,76 1101,160" />
+          <polygon points="1082,160 1098,86 1114,160" />
+          <polygon points="1098,160 1114,81 1130,160" />
+          <polygon points="1115,160 1132,89 1149,160" />
+          <polygon points="1130,160 1148,80 1166,160" />
+          <polygon points="1250,160 1267,88 1284,160" />
+          <polygon points="1265,160 1283,76 1301,160" />
+          <polygon points="1282,160 1298,84 1314,160" />
+          <polygon points="1298,160 1315,90 1332,160" />
+          <polygon points="1314,160 1332,80 1350,160" />
+          <polygon points="1330,160 1348,88 1366,160" />
+          <polygon points="1348,160 1365,82 1382,160" />
+          <polygon points="1364,160 1381,91 1398,160" />
+          <polygon points="1380,160 1398,78 1416,160" />
+          <polygon points="1396,160 1413,86 1430,160" />
+          <polygon points="1414,160 1430,90 1446,160" />
+        </g>
+      </svg>
+    </div>
+
+    <div class="ground"></div>
+
+    <!-- Airplane -->
+    <div class="plane-wrap">
+      <svg class="plane-svg" viewBox="0 0 130 42" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="58" cy="21" rx="46" ry="9.5" fill="white" opacity=".97" />
+        <path d="M104 21C116 21 128 19 128 21C128 23 116 21 104 21Z" fill="white" opacity=".97" />
+        <path d="M12 21C8 12 4 7 2 7C4 7 10 12 12 21Z" fill="white" opacity=".92" />
+        <path d="M12 21C8 30 4 35 2 35C4 35 10 30 12 21Z" fill="white" opacity=".92" />
+        <path d="M64 22C52 38 28 44 14 42C28 37 56 30 64 22Z" fill="white" opacity=".88" />
+        <path d="M64 20C52 4 28 -2 14 0C28 5 56 12 64 20Z" fill="white" opacity=".88" />
+        <path d="M16 22C12 27 6 29 3 28C7 27 12 25 16 22Z" fill="white" opacity=".82" />
+        <path d="M16 20C12 15 6 13 3 14C7 15 12 17 16 20Z" fill="white" opacity=".82" />
+        <ellipse cx="52" cy="28" rx="12" ry="4" fill="#e0e8f0" opacity=".68" />
+        <ellipse cx="52" cy="14" rx="12" ry="4" fill="#e0e8f0" opacity=".68" />
+        <circle cx="78" cy="19" r="2.4" fill="#b8d4f5" opacity=".75" />
+        <circle cx="87" cy="18.5" r="2.4" fill="#b8d4f5" opacity=".75" />
+        <circle cx="96" cy="18.5" r="2.4" fill="#b8d4f5" opacity=".72" />
+        <circle cx="105" cy="19" r="2.4" fill="#b8d4f5" opacity=".65" />
+      </svg>
+    </div>
+  </div>
+
+  <div class="overlay"></div>
+
+  <!-- ══ STAGE ══ -->
+  <div class="stage">
+    <div class="card" id="card">
+
+      <!-- Back link -->
+      <a href="view-trips.html" class="back-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+          stroke-linejoin="round">
+          <polyline points="15 18 9 12 15 6" />
+        </svg>
+        Back to Dashboard
+      </a>
+
+      <!-- Header -->
+      <div class="card-header">
+        <div class="header-icon">🗺️</div>
+        <h1 class="card-title">Create Your Trip</h1>
+        <p class="card-sub">Plan every detail of your next adventure</p>
+      </div>
+
+      <!-- Progress steps -->
+      <div class="progress-strip">
+        <div class="step active">
+          <div class="step-dot">1</div>
+          <span class="step-lbl">Details</span>
+        </div>
+        <div class="step">
+          <div class="step-dot">2</div>
+          <span class="step-lbl">Itinerary</span>
+        </div>
+        <div class="step">
+          <div class="step-dot">3</div>
+          <span class="step-lbl">Review</span>
+        </div>
+      </div>
+
+      <!-- Divider -->
+      <div class="div-row">
+        <span class="div-line"></span>
+        <span class="div-ico">◆ &nbsp; TRIP DETAILS &nbsp; ◆</span>
+        <span class="div-line"></span>
+      </div>
+
+      <!-- Form -->
+      <form class="form" id="tripForm" novalidate>
+
+        <!-- Trip Name -->
+        <div class="field" id="nameField">
+          <label class="field-label" for="tripName">
+            Trip Name <span class="label-required">*</span>
+          </label>
+          <div class="input-wrap">
+            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+              <path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            <input class="input" id="tripName" type="text" placeholder="e.g. Golden Triangle India"
+              autocomplete="off" />
+          </div>
+          <span class="field-msg" id="nameMsg"></span>
+        </div>
+
+        <!-- Destination -->
+        <div class="field" id="destField">
+          <label class="field-label" for="destination">
+            Destination <span class="label-required">*</span>
+          </label>
+          <div class="input-wrap">
+            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="2" y1="12" x2="22" y2="12" />
+              <path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z" />
+            </svg>
+            <input class="input" id="destination" type="text" placeholder="e.g. Jaipur, Rajasthan" autocomplete="off" />
+          </div>
+          <span class="field-msg" id="destMsg"></span>
+        </div>
+
+        <!-- Date range row -->
+        <div class="field-row">
+          <div class="field" id="startField">
+            <label class="field-label" for="startDate">
+              Departure <span class="label-required">*</span>
+            </label>
+            <div class="input-wrap">
+              <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                <line x1="16" y1="2" x2="16" y2="6" />
+                <line x1="8" y1="2" x2="8" y2="6" />
+                <line x1="3" y1="10" x2="21" y2="10" />
+              </svg>
+              <input class="input" id="startDate" type="date" />
+            </div>
+            <span class="field-msg" id="startMsg"></span>
+          </div>
+          <div class="field" id="endField">
+            <label class="field-label" for="endDate">Return</label>
+            <div class="input-wrap">
+              <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                <line x1="16" y1="2" x2="16" y2="6" />
+                <line x1="8" y1="2" x2="8" y2="6" />
+                <line x1="3" y1="10" x2="21" y2="10" />
+              </svg>
+              <input class="input" id="endDate" type="date" />
+            </div>
+            <span class="field-msg" id="endMsg"></span>
+          </div>
+        </div>
+
+        <!-- Budget row -->
+        <div class="field-row">
+          <div class="field" id="budgetField">
+            <label class="field-label" for="budget">
+              Budget <span class="label-required">*</span>
+            </label>
+            <div class="input-wrap">
+              <span class="input-icon">₹</span>
+              <input class="input" id="budget" type="number" placeholder="0" min="0" style="padding-right:46px" />
+              <span class="input-suffix">Rs.</span>
+            </div>
+            <span class="field-msg" id="budgetMsg"></span>
+          </div>
+          <div class="field">
+            <label class="field-label" for="tripType">Trip Type</label>
+            <div class="input-wrap">
+              <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <polygon
+                  points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+              </svg>
+              <select class="input" id="tripType">
+                <option value="">Select type</option>
+                <option value="leisure">🌴 Leisure</option>
+                <option value="adventure">🧗 Adventure</option>
+                <option value="cultural">🏛️ Cultural</option>
+                <option value="business">💼 Business</option>
+                <option value="romantic">💑 Romantic</option>
+                <option value="family">👨‍👩‍👧 Family</option>
+              </select>
+              <span class="select-arrow">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                  stroke-linejoin="round">
+                  <polyline points="6 9 12 15 18 9" />
+                </svg>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Travelers and Transport row -->
+        <div class="field-row">
+          <!-- Travelers -->
+          <div class="field">
+            <label class="field-label">Travelers</label>
+            <div class="travelers-wrap" id="travWrap">
+              <span class="trav-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                  stroke-linejoin="round">
+                  <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+                  <circle cx="9" cy="7" r="4" />
+                  <path d="M23 21v-2a4 4 0 00-3-3.87" />
+                  <path d="M16 3.13a4 4 0 010 7.75" />
+                </svg>
+              </span>
+              <span class="trav-label" id="travLabel">Select travelers</span>
+              <div class="trav-controls">
+                <button type="button" class="trav-btn" id="travMinus">−</button>
+                <span class="trav-count" id="travCount">1</span>
+                <button type="button" class="trav-btn" id="travPlus">+</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Transport Mode -->
+          <div class="field">
+            <label class="field-label" for="transportMode">Transport</label>
+            <div class="input-wrap">
+              <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="3 11 22 2 13 21 11 13 3 11" />
+              </svg>
+              <select class="input" id="transportMode">
+                <option value="">Select transport</option>
+                <option value="bus">🚌 Bus</option>
+                <option value="train">🚆 Train</option>
+                <option value="flight">✈️ Flight</option>
+              </select>
+              <span class="select-arrow">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                  stroke-linejoin="round">
+                  <polyline points="6 9 12 15 18 9" />
+                </svg>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Trip category chips -->
+        <div>
+          <p class="chips-label">Highlights & Activities</p>
+          <div class="chips" id="chipsContainer">
+            <button type="button" class="chip" data-val="beach">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <path d="M14 9V5a3 3 0 00-6 0v4" />
+                <rect x="3" y="9" width="18" height="11" rx="2" ry="2" />
+              </svg>Beach
+            </button>
+            <button type="button" class="chip" data-val="mountains">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <polygon points="3 17 9 7 13 13 15 11 21 17" />
+              </svg>Mountains
+            </button>
+            <button type="button" class="chip" data-val="food">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <path d="M18 8h1a4 4 0 010 8h-1" />
+                <path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z" />
+                <line x1="6" y1="1" x2="6" y2="4" />
+                <line x1="10" y1="1" x2="10" y2="4" />
+                <line x1="14" y1="1" x2="14" y2="4" />
+              </svg>Food
+            </button>
+            <button type="button" class="chip" data-val="history">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <polyline points="12 6 12 12 16 14" />
+              </svg>History
+            </button>
+            <button type="button" class="chip" data-val="nightlife">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
+              </svg>Nightlife
+            </button>
+            <button type="button" class="chip" data-val="wildlife">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+              </svg>Wildlife
+            </button>
+            <button type="button" class="chip" data-val="shopping">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
+                <line x1="3" y1="6" x2="21" y2="6" />
+                <path d="M16 10a4 4 0 01-8 0" />
+              </svg>Shopping
+            </button>
+            <button type="button" class="chip" data-val="wellness">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <path
+                  d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
+              </svg>Wellness
+            </button>
+          </div>
+        </div>
+
+        <!-- Notes -->
+        <div class="field" style="animation-delay:.72s">
+          <label class="field-label" for="notes">Travel Notes</label>
+          <div class="input-wrap" style="align-items:flex-start">
+            <svg class="input-icon" style="top:14px;position:absolute" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+              <polyline points="14 2 14 8 20 8" />
+              <line x1="16" y1="13" x2="8" y2="13" />
+              <line x1="16" y1="17" x2="8" y2="17" />
+              <polyline points="10 9 9 9 8 9" />
+            </svg>
+            <textarea class="textarea" id="notes" rows="2" maxlength="200"
+              placeholder="Any special requirements, dreams or notes for this trip…"></textarea>
+          </div>
+        </div>
+        <p class="char-count"><span id="charLeft">200</span> characters remaining</p>
+
+        <!-- Submit -->
+        <button type="submit" class="btn-submit" id="submitBtn">
+          <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 2L11 13" />
+            <path d="M22 2L15 22 11 13 2 9l20-7z" />
+          </svg>
+          <span class="btn-text">Create Trip</span>
+          <div class="btn-spinner"></div>
+        </button>
+
+      </form>
+
+      <p class="card-foot">✈ &nbsp; Discover · Dream · Depart &nbsp; ✈</p>
+    </div>
+  </div>
+
+
+  <!-- AI Chatbox Button -->
+  <a href="Chatbot.html" class="ai-chat-btn" onclick="localStorage.setItem('chatbot_source','create-trip.html')">
+    <svg class="ai-chat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+      stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+      <path d="M12 7L13.5 10.5L17 12L13.5 13.5L12 17L10.5 13.5L7 12L10.5 10.5L12 7Z" fill="currentColor"></path>
+    </svg>
+    <span>AI-chatbox</span>
+  </a>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+    /* ══ Stars ══ */
+    (function () {
+      const c = document.getElementById('starCanvas'), ctx = c.getContext('2d');
+      let stars = [], W, H;
+      function resize() { W = c.width = window.innerWidth; H = c.height = window.innerHeight; build() }
+      function build() {
+        stars = [];
+        for (let i = 0; i < 80; i++) stars.push({
+          x: Math.random() * W, y: Math.random() * H * .58,
+          r: Math.random() * 1.5 + .3, a: Math.random(),
+          da: (Math.random() * .011 + .004) * (Math.random() < .5 ? 1 : -1),
+          maxA: Math.random() * .65 + .3
+        });
+      }
+      function draw() {
+        ctx.clearRect(0, 0, W, H);
+        stars.forEach(s => {
+          s.a += s.da; if (s.a > s.maxA || s.a < .05) s.da *= -1;
+          ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(255,245,220,${s.a})`; ctx.fill();
+        });
+        requestAnimationFrame(draw);
+      }
+      window.addEventListener('resize', resize); resize(); draw();
+    })();
+
+    /* ══ Sun rays ══ */
+    (function () {
+      const w = document.getElementById('rays');
+      for (let i = 0; i < 18; i++) {
+        const r = document.createElement('div'); r.className = 'ray';
+        r.style.transform = `rotate(${i * 20}deg)`; w.appendChild(r);
+      }
+    })();
+
+    /* ══ Parallax ══ */
+    (function () {
+      const card = document.getElementById('card');
+      let tx = 0, ty = 0, cx = 0, cy = 0;
+      document.addEventListener('mousemove', e => {
+        tx = ((e.clientX / window.innerWidth) - .5) * 2 * 5.5;
+        ty = ((e.clientY / window.innerHeight) - .5) * 2 * -4;
+      });
+      document.addEventListener('mouseleave', () => { tx = 0; ty = 0 });
+      function tick() {
+        cx += (tx - cx) * .05; cy += (ty - cy) * .05;
+        card.style.transform = `perspective(1000px) rotateY(${cx.toFixed(3)}deg) rotateX(${cy.toFixed(3)}deg)`;
+        requestAnimationFrame(tick);
+      }
+      tick();
+      if ('ontouchstart' in window) card.style.transform = 'none';
+    })();
+
+    /* ══ Set min date to today ══ */
+    (function () {
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('startDate').min = today;
+      document.getElementById('endDate').min = today;
+      document.getElementById('startDate').addEventListener('change', function () {
+        document.getElementById('endDate').min = this.value || today;
+      });
+    })();
+
+    /* ══ Travelers stepper ══ */
+    let travelers = 1;
+    function updateTrav() {
+      const lbl = document.getElementById('travLabel');
+      const cnt = document.getElementById('travCount');
+      cnt.textContent = travelers;
+      lbl.textContent = travelers === 1 ? 'Traveller' : `${travelers} Travelers`;
+      lbl.classList.add('has-value');
+      document.getElementById('travMinus').disabled = travelers <= 1;
+    }
+    document.getElementById('travPlus').addEventListener('click', () => { if (travelers < 20) { travelers++; updateTrav() } });
+    document.getElementById('travMinus').addEventListener('click', () => { if (travelers > 1) { travelers--; updateTrav() } });
+    updateTrav();
+
+    /* ══ Chips ══ */
+    const selectedChips = new Set();
+    document.querySelectorAll('.chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        const v = chip.dataset.val;
+        if (selectedChips.has(v)) { selectedChips.delete(v); chip.classList.remove('selected') }
+        else { selectedChips.add(v); chip.classList.add('selected') }
+      });
+    });
+
+    /* ══ Notes char counter ══ */
+    document.getElementById('notes').addEventListener('input', function () {
+      document.getElementById('charLeft').textContent = 200 - this.value.length;
+    });
+
+    /* ══ Validation helpers ══ */
+    function setField(fieldId, msgId, state, msg) {
+      const f = document.getElementById(fieldId);
+      if (!f) return;
+      const inp = f.querySelector('.input,.textarea');
+      const m = document.getElementById(msgId);
+      if (!inp || !m) return;
+      inp.classList.remove('error', 'valid');
+      m.classList.remove('show', 'err', 'ok');
+      if (state === 'error') { inp.classList.add('error'); m.classList.add('show', 'err') }
+      if (state === 'valid') { inp.classList.add('valid'); m.classList.add('show', 'ok') }
+      m.textContent = msg || '';
+    }
+    function blurValidate(fieldId, msgId, fn, inputId) {
+      const el = document.getElementById(inputId);
+      if (!el) return;
+      el.addEventListener('blur', function () {
+        const r = fn(this.value.trim());
+        setField(fieldId, msgId, r.ok ? 'valid' : 'error', r.msg);
+      });
+      el.addEventListener('input', function () {
+        if (this.classList.contains('error') || this.classList.contains('valid')) {
+          const r = fn(this.value.trim());
+          setField(fieldId, msgId, r.ok ? 'valid' : 'error', r.msg);
+        }
+      });
+    }
+    blurValidate('nameField', 'nameMsg', v => v ? { ok: true, msg: '✓ Great trip name!' } : { ok: false, msg: 'Trip name is required' }, 'tripName');
+    blurValidate('destField', 'destMsg', v => v ? { ok: true, msg: '✓ Destination set!' } : { ok: false, msg: 'Destination is required' }, 'destination');
+    blurValidate('startField', 'startMsg', v => v ? { ok: true, msg: '✓ Departure set' } : { ok: false, msg: 'Please pick a departure date' }, 'startDate');
+    blurValidate('budgetField', 'budgetMsg', v => {
+      if (!v) return { ok: false, msg: 'Please enter a budget' };
+      if (isNaN(v) || Number(v) < 0) return { ok: false, msg: 'Enter a valid amount' };
+      return { ok: true, msg: `✓ Budget: Rs. ${Number(v).toLocaleString()}` };
+    }, 'budget');
+
+    /* ══ Form submit ══ */
+    document.getElementById('tripForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      const name = document.getElementById('tripName').value.trim();
+      const dest = document.getElementById('destination').value.trim();
+      const start = document.getElementById('startDate').value;
+      const budget = document.getElementById('budget').value;
+
+      const nR = name ? { ok: true, msg: '✓ Great trip name!' } : { ok: false, msg: 'Trip name is required' };
+      const dR = dest ? { ok: true, msg: '✓ Destination set!' } : { ok: false, msg: 'Destination is required' };
+      const sR = start ? { ok: true, msg: '✓ Departure set' } : { ok: false, msg: 'Please pick a departure date' };
+      const bR = budget && !isNaN(budget) && Number(budget) >= 0
+        ? { ok: true, msg: `✓ Budget: Rs. ${Number(budget).toLocaleString()}` }
+        : { ok: false, msg: 'Please enter a budget' };
+
+      setField('nameField', 'nameMsg', nR.ok ? 'valid' : 'error', nR.msg);
+      setField('destField', 'destMsg', dR.ok ? 'valid' : 'error', dR.msg);
+      setField('startField', 'startMsg', sR.ok ? 'valid' : 'error', sR.msg);
+      setField('budgetField', 'budgetMsg', bR.ok ? 'valid' : 'error', bR.msg);
+
+      if (!nR.ok || !dR.ok || !sR.ok || !bR.ok) {
+        showToast('⚠️ Please fill all required fields', ''); return;
+      }
+
+      const btn = document.getElementById('submitBtn');
+      btn.classList.add('loading'); btn.disabled = true;
+
+      const type = document.getElementById('tripType') ? document.getElementById('tripType').value : '';
+      const transport = document.getElementById('transportMode') ? document.getElementById('transportMode').value : '';
+
+      const tripData = {
+        tripName: name,
+        destination: dest,
+        startDate: start,
+        endDate: document.getElementById('endDate').value, // Fixed end date
+        budget: budget,
+        tripType: type,
+        transportMode: transport,
+        travelers: travelers
+      };
+      // Store in localStorage including new properties
+      localStorage.setItem('tripData', JSON.stringify(tripData));
+
+      showToast('🌍 Heading to your itinerary…', 'success');
+
+      setTimeout(() => {
+        window.location.href = "Itinerary.html";
+      }, 1500);
+    });
+
+    /* ══ Toast ══ */
+    let toastT = null;
+    function showToast(msg, type) {
+      const t = document.getElementById('toast');
+      if (toastT) { clearTimeout(toastT); t.classList.remove('on', 'success'); void t.offsetWidth }
+      t.textContent = msg; if (type === 'success') t.classList.add('success');
+      t.classList.add('on');
+      toastT = setTimeout(() => { t.classList.remove('on', 'success'); toastT = null }, 2800);
+    }
+
+    /* ══ Stagger form fields ══ */
+    document.querySelectorAll('.field,.field-row,.chips-label,.chips,.travelers-wrap,.char-count,.btn-submit,.card-foot').forEach((el, i) => {
+      if (el.style.animationDelay) return;
+      el.style.opacity = '0'; el.style.transform = 'translateY(12px)';
+      setTimeout(() => {
+        el.style.transition = 'opacity .42s ease,transform .42s ease';
+        el.style.opacity = '1'; el.style.transform = 'translateY(0)';
+      }, 650 + i * 80);
+    });
+  </script>
+</body>
+
+</html>
