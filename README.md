@@ -261,19 +261,23 @@ This repository is maintained as a portfolio project to demonstrate my understan
 
 ---
 
-# 👩‍💻 Developer
+# 👥 Project Team
 
-**Tanvi Goyal**
+This project was developed as part of a College Mini Project.
 
-**Role:** Team Leader
+**Team Leader**
+- Tanvi Goyal
 
 B.Tech Computer Science Student
 
 Backend Development • Cloud Computing • AWS • Java • Python
 
+**Project Type**
+- Academic Mini Project
+
 ### Connect with Me
 
-- 💼 LinkedIn: https://www.linkedin.com/in/your-linkedin/
+- 💼 LinkedIn: [https://www.linkedin.com/in/your-linkedin/](https://www.linkedin.com/in/tanvi-goyal-086a08331/)
 - 💻 GitHub: https://github.com/goyaltanvi378-git
 
 ---
